@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pilot</title>
+</head>
+<body>
+<div id="pad" style="height: 100%; position: fixed; width: 100%;"></div>
+<script>
+    const pad = document.getElementById('pad')
+    const webSocket = new WebSocket('/')
+    webSocket.onopen = () => {
+        const input = {
+            mouseMove: 0
+        }
+        const mouseDownButton = 1
+        let x, y
+        pad.onmousedown = (event) => {
+            x = event.clientX
+            y = event.clientY
+        }
+        pad.onmousemove = (event) => {
+            if (event.buttons === mouseDownButton) {
+                handleMouseMove(event.clientX, event.clientY)
+            }
+        }
+        pad.ontouchstart = (event) => {
+            const touch = event.touches[0]
+            x = touch.clientX
+            y = touch.clientY
+        }
+        pad.ontouchmove = (event) => {
+            const touch = event.touches[0]
+            handleMouseMove(touch.clientX, touch.clientY)
+        }
+        /**
+         * @param {number} newX
+         * @param {number} newY
+         */
+        const handleMouseMove = (newX, newY) => {
+            const movementX = newX - x
+            const movementY = newY - y
+            sendMouseMoveInput(movementX, movementY)
+            x = newX
+            y = newY
+        }
+        /**
+         * @param {number} movementX
+         * @param {number} movementY
+         */
+        const sendMouseMoveInput = (movementX, movementY) => {
+            movementX = Math.max(0, Math.min(255, movementX + 128))
+            movementY = Math.max(0, Math.min(255, movementY + 128))
+            const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
+            webSocket.send(bytes)
+        }
+    }
+    webSocket.onclose = () => {
+        pad.onmousedown = null
+        pad.onmousemove = null
+        pad.ontouchstart = null
+        pad.ontouchmove = null
+    }
+</script>
+</body>
+</html>
