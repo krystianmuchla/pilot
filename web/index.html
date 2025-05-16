@@ -13,9 +13,12 @@
         const input = {
             mouseMove: 0
         }
-        const mouseDownButton = 1
         let x, y
+        let lastTickTime
+        const tickInterval = 20
+        const mouseDownButton = 1
         pad.onmousedown = (event) => {
+            lastTickTime = 0
             x = event.clientX
             y = event.clientY
         }
@@ -24,25 +27,46 @@
                 handleMouseMove(event.clientX, event.clientY)
             }
         }
-        pad.ontouchstart = (event) => {
-            const touch = event.touches[0]
-            x = touch.clientX
-            y = touch.clientY
+        let touchMoveHistory
+        let firstTouchMove
+        pad.ontouchstart = () => {
+            lastTickTime = 0
+            touchMoveHistory = []
+            firstTouchMove = true
         }
         pad.ontouchmove = (event) => {
+            event.preventDefault()
             const touch = event.touches[0]
-            handleMouseMove(touch.clientX, touch.clientY)
+            let newX = touch.clientX
+            let newY = touch.clientY
+            if (firstTouchMove) {
+                x = newX
+                y = newY
+                firstTouchMove = false
+            }
+            touchMoveHistory.push([newX, newY])
+            if (touchMoveHistory.length > 3) {
+                touchMoveHistory.shift()
+            }
+            newX = touchMoveHistory.map((p) => p[0]).reduce((a, b) => a + b) / touchMoveHistory.length
+            newY = touchMoveHistory.map((p) => p[1]).reduce((a, b) => a + b) / touchMoveHistory.length
+            newX = Math.floor(newX)
+            newY = Math.floor(newY)
+            handleMouseMove(newX, newY)
         }
         /**
          * @param {number} newX
          * @param {number} newY
          */
         const handleMouseMove = (newX, newY) => {
-            const movementX = newX - x
-            const movementY = newY - y
-            sendMouseMoveInput(movementX, movementY)
-            x = newX
-            y = newY
+            if (Date.now() - tickInterval > lastTickTime) {
+                lastTickTime = Date.now()
+                const movementX = newX - x
+                const movementY = newY - y
+                sendMouseMoveInput(movementX, movementY)
+                x = newX
+                y = newY
+            }
         }
         /**
          * @param {number} movementX
