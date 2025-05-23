@@ -1,20 +1,24 @@
 package application
 
 import (
-	http2 "pilot/internal/infrastructure/http"
+	"pilot/internal/infrastructure/http"
 	"pilot/internal/logic"
 )
 
-func ResolveDependencies() (*http2.Handler, error) {
+func ResolveDependencies() (*http.Handler, error) {
 	mouseController, err := logic.NewMouseController()
 	if err != nil {
 		return nil, err
 	}
-	webSocketController := http2.NewWebSocketController(mouseController)
-	httpController, err := http2.NewHttpController()
+	keyboardController, err := logic.NewKeyboardController()
 	if err != nil {
 		return nil, err
 	}
-	handler := http2.NewHandler(webSocketController, httpController)
+	webSocketController := http.NewWebSocketController(mouseController, keyboardController)
+	httpController, err := http.NewHttpController()
+	if err != nil {
+		return nil, err
+	}
+	handler := http.NewHandler(webSocketController, httpController)
 	return &handler, nil
 }

@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pilot</title>
 </head>
-<body>
-<div id="pad" style="height: 100%; position: fixed; width: 100%;"></div>
+<body style="background-color: black; margin: 0">
+<div id="pad" style="height: 100%; position: fixed; width: 100%"></div>
+<div style="background-color: white; left: 10px; position: fixed; top: 10px">
+    <input id="keyboard"
+           style="background-color: white; border: 0; border-radius: 50%; caret-color: transparent; cursor: pointer; height: 40px; justify-content: center; outline: 0; position: fixed; width: 40px"/>
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
+         style="left: 10px; pointer-events: none; position: absolute; top: 10px">
+        <path d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm0-80h640v-400H160v400Zm160-40h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM160-280v-400 400Z"/>
+    </svg>
+</div>
 <script>
     const pad = document.getElementById('pad')
+    const keyboard = document.getElementById('keyboard')
     const webSocket = new WebSocket('/')
     webSocket.onopen = () => {
         const input = {
-            mouseMove: 0
+            mouseMove: 0,
+            mouseButton1: 1,
+            keyboard: 4,
         }
         let x, y
         let lastTickTime
@@ -27,10 +38,18 @@
                 handleMouseMove(event.clientX, event.clientY)
             }
         }
+        pad.onmouseup = (event) => {
+            if (event.clientX === x && event.clientY === y) {
+                sendMouseButtonInput(input.mouseButton1)
+            }
+        }
         let touchMoveHistory
         let firstTouchMove
-        pad.ontouchstart = () => {
+        pad.ontouchstart = (event) => {
             lastTickTime = 0
+            const touch = event.touches[0]
+            x = touch.clientX
+            y = touch.clientY
             touchMoveHistory = []
             firstTouchMove = true
         }
@@ -53,6 +72,12 @@
             newX = Math.floor(newX)
             newY = Math.floor(newY)
             handleMouseMove(newX, newY)
+        }
+        pad.ontouchend = (event) => {
+            const touch = event.touches[0]
+            if (touch.clientX === x && touch.clientY === y) {
+                sendMouseButtonInput(input.mouseButton1)
+            }
         }
         /**
          * @param {number} newX
@@ -78,12 +103,95 @@
             const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
             webSocket.send(bytes)
         }
+        /**
+         * @param {number} buttonInput
+         */
+        const sendMouseButtonInput = (buttonInput) => {
+            const bytes = new Uint8Array([buttonInput])
+            webSocket.send(bytes)
+        }
+        keyboard.onfocus = () => {
+            keyboard.style.outline = '4px green solid'
+        }
+        keyboard.onblur = () => {
+            keyboard.style.outline = '0'
+        }
+        keyboard.oninput = () => {
+            sendKeyboardInput(keyboard.value)
+            keyboard.value = ''
+        }
+        keyboard.onkeydown = (event) => {
+            event.preventDefault()
+            sendKeyboardInput(event.key)
+        }
+        /**
+         * @param {string} keyboardInput
+         */
+        const sendKeyboardInput = (keyboardInput) => {
+            let keys = [
+                'Escape',
+                'F1',
+                'F2',
+                'F3',
+                'F4',
+                'F5',
+                'F6',
+                'F7',
+                'F8',
+                'F9',
+                'F10',
+                'F11',
+                'F12',
+                'Home',
+                'End',
+                'Insert',
+                'Delete',
+                'Backspace',
+                'Enter',
+                'PageUp',
+                'PageDown',
+                'ArrowUp',
+                'ArrowDown',
+                'ArrowLeft',
+                'ArrowRight',
+                'CapsLock',
+                'Tab',
+            ]
+            let index = keys.findIndex((key) => key === keyboardInput)
+            if (index >= 0) {
+                const keyCode = index + 127
+                const bytes = new Uint8Array([input.keyboard, keyCode])
+                webSocket.send(bytes)
+                return
+            }
+            keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+            index = keys.indexOf(keyboardInput)
+            if (index >= 0) {
+                const keyCode = index + 32
+                const bytes = new Uint8Array([input.keyboard, keyCode])
+                webSocket.send(bytes)
+                return
+            }
+            keys = 'xĄxŁxxŚxxxxxŹxxŻxąxłxxśxxxxxźxxżxxxxxxĆxxxĘxxxxxxŃxÓxxxxxxxxxxxxxxxxxxćxxxęxxxxxxńxó'
+            index = keys.indexOf(keyboardInput)
+            if (index >= 0) {
+                const keyCode = index + 160
+                const bytes = new Uint8Array([input.keyboard, keyCode])
+                webSocket.send(bytes)
+            }
+        }
     }
     webSocket.onclose = () => {
         pad.onmousedown = null
         pad.onmousemove = null
+        pad.onmouseup = null
         pad.ontouchstart = null
         pad.ontouchmove = null
+        pad.ontouchend = null
+        keyboard.onfocus = null
+        keyboard.onblur = null
+        keyboard.oninput = null
+        keyboard.onkeydown = null
     }
 </script>
 </body>

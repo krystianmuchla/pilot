@@ -7,15 +7,18 @@ import (
 )
 
 const (
-	mouseMoveInput byte = 0
+	mouseMoveInput    byte = 0
+	mouseButton1Input byte = 1
+	keyboardInput     byte = 4
 )
 
 type WebSocketController struct {
-	mouseController *logic.MouseController
+	mouseController    *logic.MouseController
+	keyboardController *logic.KeyboardController
 }
 
-func NewWebSocketController(mouseController *logic.MouseController) *WebSocketController {
-	return &WebSocketController{mouseController: mouseController}
+func NewWebSocketController(mouseController *logic.MouseController, keyboardController *logic.KeyboardController) *WebSocketController {
+	return &WebSocketController{mouseController, keyboardController}
 }
 
 func (controller WebSocketController) Handle(responseWriter http.ResponseWriter, request *http.Request) error {
@@ -33,7 +36,20 @@ func (controller WebSocketController) Handle(responseWriter http.ResponseWriter,
 			if payload[0] == mouseMoveInput {
 				x := int(payload[1]) - 128
 				y := int(payload[2]) - 128
-				err := controller.mouseController.Move(x, y)
+				err = controller.mouseController.Move(x, y)
+				if err != nil {
+					println(err.Error())
+					break
+				}
+			} else if payload[0] == mouseButton1Input {
+				err = controller.mouseController.ClickButton1()
+				if err != nil {
+					println(err.Error())
+					break
+				}
+			} else if payload[0] == keyboardInput {
+				keyCode := payload[1]
+				err = controller.keyboardController.EnterKey(keyCode)
 				if err != nil {
 					println(err.Error())
 					break
@@ -49,7 +65,7 @@ func (controller WebSocketController) Handle(responseWriter http.ResponseWriter,
 }
 
 var webSocketUpgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
+	CheckOrigin: func(request *http.Request) bool {
 		return true
 	},
 }
