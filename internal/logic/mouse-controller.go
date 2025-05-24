@@ -33,3 +33,15 @@ func (controller *MouseController) ClickButton1() error {
 	}
 	return nil
 }
+
+func (controller *MouseController) Scroll(x int, y int) error {
+	err := controller.mouse.Wheel(true, int32(x))
+	if err != nil {
+		return err
+	}
+	err = controller.mouse.Wheel(false, int32(y*-1))
+	if err != nil {
+		return err
+	}
+	return nil
+}

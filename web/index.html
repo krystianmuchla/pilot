@@ -14,33 +14,42 @@
         <path d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm0-80h640v-400H160v400Zm160-40h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM160-280v-400 400Z"/>
     </svg>
 </div>
+<div id="scroll" data-checked
+     style="background-color: white; border-radius: 50%; cursor: pointer; height: 40px; position: fixed; right: 10px; top: 10px; width: 40px">
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
+         style="left: 8px; pointer-events: none; position: absolute; top: 8px">
+        <path d="M480-80 310-250l57-57 73 73v-206H235l73 72-58 58L80-480l169-169 57 57-72 72h206v-206l-73 73-57-57 170-170 170 170-57 57-73-73v206h205l-73-72 58-58 170 170-170 170-57-57 73-73H520v205l72-73 58 58L480-80Z"/>
+    </svg>
+</div>
 <script>
     const pad = document.getElementById('pad')
+    const scroll = document.getElementById('scroll')
     const keyboard = document.getElementById('keyboard')
     const webSocket = new WebSocket('/')
     webSocket.onopen = () => {
         const input = {
             mouseMove: 0,
             mouseButton1: 1,
-            keyboard: 4,
+            scroll: 4,
+            keyboard: 5,
         }
         let x, y
         let lastTickTime
-        const tickInterval = 20
-        const mouseDownButton = 1
         pad.onmousedown = (event) => {
             lastTickTime = 0
             x = event.clientX
             y = event.clientY
         }
+        const mouseDownButton = 1
         pad.onmousemove = (event) => {
             if (event.buttons === mouseDownButton) {
-                handleMouseMove(event.clientX, event.clientY)
+                const moveInput = scroll.dataset.checked ? sendScrollInput : sendMouseMoveInput
+                handleMove(event.clientX, event.clientY, moveInput)
             }
         }
         pad.onmouseup = (event) => {
             if (event.clientX === x && event.clientY === y) {
-                sendMouseButtonInput(input.mouseButton1)
+                sendMouseButton1Input()
             }
         }
         let touchMoveHistory
@@ -71,44 +80,24 @@
             newY = touchMoveHistory.map((p) => p[1]).reduce((a, b) => a + b) / touchMoveHistory.length
             newX = Math.floor(newX)
             newY = Math.floor(newY)
-            handleMouseMove(newX, newY)
+            const moveInput = scroll.dataset.checked ? sendScrollInput : sendMouseMoveInput
+            handleMove(newX, newY, moveInput)
         }
         pad.ontouchend = (event) => {
             const touch = event.touches[0]
             if (touch.clientX === x && touch.clientY === y) {
-                sendMouseButtonInput(input.mouseButton1)
+                sendMouseButton1Input()
             }
         }
-        /**
-         * @param {number} newX
-         * @param {number} newY
-         */
-        const handleMouseMove = (newX, newY) => {
-            if (Date.now() - tickInterval > lastTickTime) {
-                lastTickTime = Date.now()
-                const movementX = newX - x
-                const movementY = newY - y
-                sendMouseMoveInput(movementX, movementY)
-                x = newX
-                y = newY
+        scroll.onclick = () => {
+            const checked = scroll.dataset.checked
+            if (checked) {
+                scroll.dataset.checked = ''
+                scroll.style.outline = '0'
+            } else {
+                scroll.dataset.checked = 'true'
+                scroll.style.outline = '4px green solid'
             }
-        }
-        /**
-         * @param {number} movementX
-         * @param {number} movementY
-         */
-        const sendMouseMoveInput = (movementX, movementY) => {
-            movementX = Math.max(0, Math.min(255, movementX + 128))
-            movementY = Math.max(0, Math.min(255, movementY + 128))
-            const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
-            webSocket.send(bytes)
-        }
-        /**
-         * @param {number} buttonInput
-         */
-        const sendMouseButtonInput = (buttonInput) => {
-            const bytes = new Uint8Array([buttonInput])
-            webSocket.send(bytes)
         }
         keyboard.onfocus = () => {
             keyboard.style.outline = '4px green solid'
@@ -117,17 +106,38 @@
             keyboard.style.outline = '0'
         }
         keyboard.oninput = () => {
-            sendKeyboardInput(keyboard.value)
+            handleKeyboard(keyboard.value)
             keyboard.value = ''
         }
         keyboard.onkeydown = (event) => {
             event.preventDefault()
-            sendKeyboardInput(event.key)
+            handleKeyboard(event.key)
+        }
+        const tickInterval = 20
+        /**
+         * @callback SendMoveInput
+         * @param {number} movementX
+         * @param {number} movementY
+         */
+        /**
+         * @param {number} newX
+         * @param {number} newY
+         * @param {SendMoveInput} sendInput
+         */
+        const handleMove = (newX, newY, sendInput) => {
+            if (Date.now() - tickInterval > lastTickTime) {
+                lastTickTime = Date.now()
+                const movementX = newX - x
+                const movementY = newY - y
+                sendInput(movementX, movementY)
+                x = newX
+                y = newY
+            }
         }
         /**
          * @param {string} keyboardInput
          */
-        const sendKeyboardInput = (keyboardInput) => {
+        const handleKeyboard = (keyboardInput) => {
             let keys = [
                 'Escape',
                 'F1',
@@ -160,25 +170,53 @@
             let index = keys.findIndex((key) => key === keyboardInput)
             if (index >= 0) {
                 const keyCode = index + 127
-                const bytes = new Uint8Array([input.keyboard, keyCode])
-                webSocket.send(bytes)
+                sendKeyboardInput(keyCode)
                 return
             }
             keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
             index = keys.indexOf(keyboardInput)
             if (index >= 0) {
                 const keyCode = index + 32
-                const bytes = new Uint8Array([input.keyboard, keyCode])
-                webSocket.send(bytes)
+                sendKeyboardInput(keyCode)
                 return
             }
             keys = 'xĄxŁxxŚxxxxxŹxxŻxąxłxxśxxxxxźxxżxxxxxxĆxxxĘxxxxxxŃxÓxxxxxxxxxxxxxxxxxxćxxxęxxxxxxńxó'
             index = keys.indexOf(keyboardInput)
             if (index >= 0) {
                 const keyCode = index + 160
-                const bytes = new Uint8Array([input.keyboard, keyCode])
-                webSocket.send(bytes)
+                sendKeyboardInput(keyCode)
             }
+        }
+        /**
+         * @param {number} movementX
+         * @param {number} movementY
+         */
+        const sendMouseMoveInput = (movementX, movementY) => {
+            movementX = Math.max(0, Math.min(255, movementX + 128))
+            movementY = Math.max(0, Math.min(255, movementY + 128))
+            const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
+            webSocket.send(bytes)
+        }
+        const sendMouseButton1Input = () => {
+            const bytes = new Uint8Array([input.mouseButton1])
+            webSocket.send(bytes)
+        }
+        /**
+         * @param {number} movementX
+         * @param {number} movementY
+         */
+        const sendScrollInput = (movementX, movementY) => {
+            movementX = Math.max(0, Math.min(255, movementX + 128))
+            movementY = Math.max(0, Math.min(255, movementY + 128))
+            const bytes = new Uint8Array([input.scroll, movementX, movementY])
+            webSocket.send(bytes)
+        }
+        /**
+         * @param {number} keyCode
+         */
+        const sendKeyboardInput = (keyCode) => {
+            const bytes = new Uint8Array([input.keyboard, keyCode])
+            webSocket.send(bytes)
         }
     }
     webSocket.onclose = () => {
@@ -188,6 +226,7 @@
         pad.ontouchstart = null
         pad.ontouchmove = null
         pad.ontouchend = null
+        scroll.onclick = null
         keyboard.onfocus = null
         keyboard.onblur = null
         keyboard.oninput = null

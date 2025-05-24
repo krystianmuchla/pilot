@@ -9,7 +9,8 @@ import (
 const (
 	mouseMoveInput    byte = 0
 	mouseButton1Input byte = 1
-	keyboardInput     byte = 4
+	scrollInput       byte = 4
+	keyboardInput     byte = 5
 )
 
 type WebSocketController struct {
@@ -43,6 +44,14 @@ func (controller WebSocketController) Handle(responseWriter http.ResponseWriter,
 				}
 			} else if payload[0] == mouseButton1Input {
 				err = controller.mouseController.ClickButton1()
+				if err != nil {
+					println(err.Error())
+					break
+				}
+			} else if payload[0] == scrollInput {
+				x := int(payload[1]) - 128
+				y := int(payload[2]) - 128
+				err = controller.mouseController.Scroll(x, y)
 				if err != nil {
 					println(err.Error())
 					break
