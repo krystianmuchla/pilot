@@ -41,15 +41,39 @@
             y = event.clientY
         }
         const mouseDownButton = 1
+        const scrollThreshold = 25
         pad.onmousemove = (event) => {
-            if (event.buttons === mouseDownButton) {
-                const moveInput = scroll.dataset.checked ? sendScrollInput : sendMouseMoveInput
-                handleMove(event.clientX, event.clientY, moveInput)
+            if (event.buttons !== mouseDownButton || !isTick()) {
+                return
+            }
+            const newX = event.clientX
+            const newY = event.clientY
+            const movementX = newX - x
+            const movementY = newY - y
+            if (scroll.dataset.checked) {
+                let scrollX, scrollY
+                if (Math.abs(movementX) > scrollThreshold) {
+                    scrollX = movementX > 0 ? 1 : -1
+                }
+                if (Math.abs(movementY) > scrollThreshold) {
+                    scrollY = movementY > 0 ? 1 : -1
+                }
+                if (scrollX != null || scrollY != null) {
+                    sendScrollInput(scrollX ?? 0, scrollY ?? 0)
+                    x = newX
+                    y = newY
+                }
+            } else {
+                sendMouseMoveInput(movementX, movementY)
+                x = newX
+                y = newY
             }
         }
         pad.onmouseup = (event) => {
-            if (event.clientX === x && event.clientY === y) {
-                sendMouseButton1Input()
+            if (!scroll.dataset.checked) {
+                if (event.clientX === x && event.clientY === y) {
+                    sendMouseButton1Input()
+                }
             }
         }
         let touchMoveHistory
@@ -59,34 +83,67 @@
             const touch = event.touches[0]
             x = touch.clientX
             y = touch.clientY
-            touchMoveHistory = []
-            firstTouchMove = true
+            if (!scroll.dataset.checked) {
+                touchMoveHistory = []
+                firstTouchMove = true
+            }
         }
         pad.ontouchmove = (event) => {
             event.preventDefault()
-            const touch = event.touches[0]
-            let newX = touch.clientX
-            let newY = touch.clientY
-            if (firstTouchMove) {
+            if (scroll.dataset.checked) {
+                if (!isTick()) {
+                    return
+                }
+                const touch = event.touches[0]
+                const newX = touch.clientX
+                const newY = touch.clientY
+                const movementX = newX - x
+                const movementY = newY - y
+                let scrollX, scrollY
+                if (Math.abs(movementX) > scrollThreshold) {
+                    scrollX = movementX > 0 ? 1 : -1
+                }
+                if (Math.abs(movementY) > scrollThreshold) {
+                    scrollY = movementY > 0 ? 1 : -1
+                }
+                if (scrollX != null || scrollY != null) {
+                    sendScrollInput(scrollX ?? 0, scrollY ?? 0)
+                    x = newX
+                    y = newY
+                }
+            } else {
+                const touch = event.touches[0]
+                let newX = touch.clientX
+                let newY = touch.clientY
+                if (firstTouchMove) {
+                    x = newX
+                    y = newY
+                    firstTouchMove = false
+                }
+                touchMoveHistory.push([newX, newY])
+                if (touchMoveHistory.length > 3) {
+                    touchMoveHistory.shift()
+                }
+                if (!isTick()) {
+                    return
+                }
+                newX = touchMoveHistory.map((p) => p[0]).reduce((a, b) => a + b) / touchMoveHistory.length
+                newY = touchMoveHistory.map((p) => p[1]).reduce((a, b) => a + b) / touchMoveHistory.length
+                newX = Math.trunc(newX)
+                newY = Math.trunc(newY)
+                const movementX = newX - x
+                const movementY = newY - y
+                sendMouseMoveInput(movementX, movementY)
                 x = newX
                 y = newY
-                firstTouchMove = false
             }
-            touchMoveHistory.push([newX, newY])
-            if (touchMoveHistory.length > 3) {
-                touchMoveHistory.shift()
-            }
-            newX = touchMoveHistory.map((p) => p[0]).reduce((a, b) => a + b) / touchMoveHistory.length
-            newY = touchMoveHistory.map((p) => p[1]).reduce((a, b) => a + b) / touchMoveHistory.length
-            newX = Math.floor(newX)
-            newY = Math.floor(newY)
-            const moveInput = scroll.dataset.checked ? sendScrollInput : sendMouseMoveInput
-            handleMove(newX, newY, moveInput)
         }
         pad.ontouchend = (event) => {
-            const touch = event.touches[0]
-            if (touch.clientX === x && touch.clientY === y) {
-                sendMouseButton1Input()
+            if (!scroll.dataset.checked) {
+                const touch = event.touches[0]
+                if (touch.clientX === x && touch.clientY === y) {
+                    sendMouseButton1Input()
+                }
             }
         }
         scroll.onclick = () => {
@@ -115,24 +172,14 @@
         }
         const tickInterval = 20
         /**
-         * @callback SendMoveInput
-         * @param {number} movementX
-         * @param {number} movementY
+         * @returns {boolean}
          */
-        /**
-         * @param {number} newX
-         * @param {number} newY
-         * @param {SendMoveInput} sendInput
-         */
-        const handleMove = (newX, newY, sendInput) => {
+        const isTick = () => {
             if (Date.now() - tickInterval > lastTickTime) {
                 lastTickTime = Date.now()
-                const movementX = newX - x
-                const movementY = newY - y
-                sendInput(movementX, movementY)
-                x = newX
-                y = newY
+                return true
             }
+            return false
         }
         /**
          * @param {string} keyboardInput
@@ -202,13 +249,13 @@
             webSocket.send(bytes)
         }
         /**
-         * @param {number} movementX
-         * @param {number} movementY
+         * @param {number} scrollX
+         * @param {number} scrollY
          */
-        const sendScrollInput = (movementX, movementY) => {
-            movementX = Math.max(0, Math.min(255, movementX + 128))
-            movementY = Math.max(0, Math.min(255, movementY + 128))
-            const bytes = new Uint8Array([input.scroll, movementX, movementY])
+        const sendScrollInput = (scrollX, scrollY) => {
+            scrollX = Math.max(0, Math.min(255, scrollX + 128))
+            scrollY = Math.max(0, Math.min(255, scrollY + 128))
+            const bytes = new Uint8Array([input.scroll, scrollX, scrollY])
             webSocket.send(bytes)
         }
         /**
