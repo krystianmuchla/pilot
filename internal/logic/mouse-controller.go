@@ -45,3 +45,55 @@ func (controller *MouseController) Scroll(x int, y int) error {
 	}
 	return nil
 }
+
+func (controller *MouseController) PressButton1() error {
+	err := controller.mouse.LeftPress()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (controller *MouseController) ReleaseButton1() error {
+	err := controller.mouse.LeftRelease()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (controller *MouseController) PressButton2() error {
+	err := controller.mouse.MiddlePress()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (controller *MouseController) ReleaseButton2() error {
+	err := controller.mouse.MiddleRelease()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (controller *MouseController) PressButton3() error {
+	err := controller.mouse.RightPress()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (controller *MouseController) ReleaseButton3() error {
+	err := controller.mouse.RightRelease()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (controller *MouseController) Stop() error {
+	return controller.mouse.Close()
+}

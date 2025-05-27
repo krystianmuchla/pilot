@@ -7,11 +7,11 @@ type Handler struct {
 	httpController      *HttpController
 }
 
-func NewHandler(webSocketController *WebSocketController, httpController *HttpController) Handler {
-	return Handler{webSocketController: webSocketController, httpController: httpController}
+func NewHandler(webSocketController *WebSocketController, httpController *HttpController) *Handler {
+	return &Handler{webSocketController: webSocketController, httpController: httpController}
 }
 
-func (handler Handler) ServeHTTP(responseWriter http.ResponseWriter, request *http.Request) {
+func (handler *Handler) ServeHTTP(responseWriter http.ResponseWriter, request *http.Request) {
 	var err error
 	if isWebSocketHandshake(request) {
 		err = handler.webSocketController.Handle(responseWriter, request)

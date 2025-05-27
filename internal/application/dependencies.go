@@ -5,20 +5,20 @@ import (
 	"pilot/internal/logic"
 )
 
-func ResolveDependencies() (*http.Handler, error) {
+func ResolveDependencies() (*logic.MouseController, *logic.KeyboardController, *http.Handler, error) {
 	mouseController, err := logic.NewMouseController()
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	keyboardController, err := logic.NewKeyboardController()
 	if err != nil {
-		return nil, err
+		return mouseController, nil, nil, err
 	}
 	webSocketController := http.NewWebSocketController(mouseController, keyboardController)
 	httpController, err := http.NewHttpController()
 	if err != nil {
-		return nil, err
+		return mouseController, keyboardController, nil, err
 	}
-	handler := http.NewHandler(webSocketController, httpController)
-	return &handler, nil
+	httpHandler := http.NewHandler(webSocketController, httpController)
+	return mouseController, keyboardController, httpHandler, nil
 }

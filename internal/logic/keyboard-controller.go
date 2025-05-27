@@ -337,3 +337,7 @@ func (controller *KeyboardController) enterTripleKey(firstKey int, secondKey int
 	}
 	return controller.keyboard.KeyUp(firstKey)
 }
+
+func (controller *KeyboardController) Stop() error {
+	return controller.keyboard.Close()
+}
