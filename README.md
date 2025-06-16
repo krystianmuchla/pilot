@@ -8,11 +8,15 @@
 To build the application, run:
 
 ```bash
-cd cmd/pilot && go build
+go build -o pilot ./cmd/
 ```
+
+or execute [build](./build.sh) script.
 
 To build and run the application, run:
 
 ```bash
-go run ./cmd/pilot
+go run ./cmd/
 ```
+
+or execute [run](./run.sh) script.

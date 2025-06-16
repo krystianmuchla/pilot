@@ -5,26 +5,28 @@
     <title>Pilot</title>
 </head>
 <body style="background-color: black; margin: 0">
-<div id="pad" style="height: 100%; position: fixed; width: 100%"></div>
-<div style="background-color: white; left: 10px; position: fixed; top: 10px">
-    <input id="keyboard"
-           style="background-color: white; border: 0; border-radius: 50%; caret-color: transparent; cursor: pointer; height: 40px; justify-content: center; outline: 0; position: fixed; width: 40px"/>
-    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
-         style="left: 10px; pointer-events: none; position: absolute; top: 10px">
-        <path d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm0-80h640v-400H160v400Zm160-40h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM160-280v-400 400Z"/>
-    </svg>
-</div>
-<div id="scroll" data-checked
-     style="background-color: white; border-radius: 50%; cursor: pointer; height: 40px; position: fixed; right: 10px; top: 10px; width: 40px">
-    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
-         style="left: 8px; pointer-events: none; position: absolute; top: 8px">
-        <path d="M480-80 310-250l57-57 73 73v-206H235l73 72-58 58L80-480l169-169 57 57-72 72h206v-206l-73 73-57-57 170-170 170 170-57 57-73-73v206h205l-73-72 58-58 170 170-170 170-57-57 73-73H520v205l72-73 58 58L480-80Z"/>
-    </svg>
-</div>
-<div style="bottom: 10px; display: grid; gap: 10px; grid-template-columns: minmax(0, 100px) 30px minmax(0, 100px); height: 40px; left: 50%; position: fixed; transform: translate(-50%, 0)">
-    <div id="button1" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
-    <div id="button2" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
-    <div id="button3" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
+<div id="pad"
+     style="display: grid; grid-template: 'a . b' auto '. . .' 1fr 'c c c' auto / auto 1fr auto; height: 100%; position: fixed; width: 100%">
+    <div style="align-content: center; align-items: center; display: grid; grid-area: a; justify-items: center; margin: 10px">
+        <input id="keyboard"
+               style="background-color: white; border: 0; border-radius: 50%; caret-color: transparent; cursor: pointer; height: 40px; outline: 0; width: 40px"/>
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
+             style="pointer-events: none; position: absolute">
+            <path d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm0-80h640v-400H160v400Zm160-40h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM160-280v-400 400Z"/>
+        </svg>
+    </div>
+    <div id="scroll" data-checked
+         style="align-content: center; background-color: white; border-radius: 50%; cursor: pointer; display: grid; grid-area: b; height: 40px; justify-items: center; margin: 10px; width: 40px">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
+             style="pointer-events: none">
+            <path d="M480-80 310-250l57-57 73 73v-206H235l73 72-58 58L80-480l169-169 57 57-72 72h206v-206l-73 73-57-57 170-170 170 170-57 57-73-73v206h205l-73-72 58-58 170 170-170 170-57-57 73-73H520v205l72-73 58 58L480-80Z"/>
+        </svg>
+    </div>
+    <div style="display: grid; gap: 10px; grid-area: c; grid-template-columns: minmax(0, 100px) 30px minmax(0, 100px); height: 40px; justify-self: center; margin: 10px">
+        <div id="button1" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
+        <div id="button2" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
+        <div id="button3" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
+    </div>
 </div>
 <script>
     const pad = document.getElementById('pad')
@@ -33,145 +35,339 @@
     const button1 = document.getElementById('button1')
     const button2 = document.getElementById('button2')
     const button3 = document.getElementById('button3')
+    const elementsOnTop = [scroll, keyboard, button1, button2, button3]
     const webSocket = new WebSocket('/')
+    const touchScreen = 'ontouchstart' in window || navigator.maxTouchPoints
+    const input = {
+        mouseMove: 0,
+        mouseButton1: 1,
+        scroll: 2,
+        keyboard: 3,
+        mouseButton1Down: 4,
+        mouseButton1Up: 5,
+        mouseButton2Down: 6,
+        mouseButton2Up: 7,
+        mouseButton3Down: 8,
+        mouseButton3Up: 9,
+    }
+    let x, y
+    let lastTickTime
     webSocket.onopen = () => {
-        const input = {
-            mouseMove: 0,
-            mouseButton1: 1,
-            scroll: 2,
-            keyboard: 3,
-            mouseButton1Down: 4,
-            mouseButton1Up: 5,
-            mouseButton2Down: 6,
-            mouseButton2Up: 7,
-            mouseButton3Down: 8,
-            mouseButton3Up: 9,
-        }
-        let x, y
-        let lastTickTime
-        pad.onmousedown = (event) => {
-            keyboard.blur()
-            lastTickTime = 0
-            x = event.clientX
-            y = event.clientY
-        }
-        const mouseDownButton = 1
-        const scrollThreshold = 25
-        pad.onmousemove = (event) => {
-            if (event.buttons !== mouseDownButton || !isTick()) {
-                return
+        if (touchScreen) {
+            for (const elementOnTop of elementsOnTop) {
+                elementOnTop.ontouchstart = (event) => event.stopPropagation()
+                elementOnTop.ontouchmove = (event) => event.stopPropagation()
+                elementOnTop.ontouchend = (event) => event.stopPropagation()
             }
-            const newX = event.clientX
-            const newY = event.clientY
-            const movementX = newX - x
-            const movementY = newY - y
-            if (scroll.dataset.checked) {
-                let scrollX, scrollY
-                if (Math.abs(movementX) > scrollThreshold) {
-                    scrollX = movementX > 0 ? 1 : -1
+            let initX, initY
+            let touchMoveHistory
+            let firstTouchMove
+            let touchId
+            pad.ontouchstart = (event) => {
+                event.preventDefault()
+                keyboard.blur()
+                lastTickTime = 0
+                const touch = event.touches[event.touches.length - 1]
+                initX = touch.clientX
+                initY = touch.clientY
+                x = initX
+                y = initY
+                touchId = touch.identifier
+                if (!scroll.dataset.checked) {
+                    touchMoveHistory = []
+                    firstTouchMove = true
                 }
-                if (Math.abs(movementY) > scrollThreshold) {
-                    scrollY = movementY > 0 ? 1 : -1
-                }
-                if (scrollX != null || scrollY != null) {
-                    sendScrollInput(scrollX ?? 0, scrollY ?? 0)
+            }
+            const scrollThreshold = 25
+            pad.ontouchmove = (event) => {
+                event.preventDefault()
+                if (scroll.dataset.checked) {
+                    if (!isTick()) {
+                        return
+                    }
+                    const touch = [...event.touches].find(touch => touch.identifier === touchId)
+                    if (touch == null) {
+                        return
+                    }
+                    const newX = touch.clientX
+                    const newY = touch.clientY
+                    const movementX = newX - x
+                    const movementY = newY - y
+                    let scrollX, scrollY
+                    if (Math.abs(movementX) > scrollThreshold) {
+                        scrollX = movementX > 0 ? 1 : -1
+                    }
+                    if (Math.abs(movementY) > scrollThreshold) {
+                        scrollY = movementY > 0 ? 1 : -1
+                    }
+                    if (scrollX != null || scrollY != null) {
+                        sendScrollInput(scrollX ?? 0, scrollY ?? 0)
+                        x = newX
+                        y = newY
+                    }
+                } else {
+                    const touch = [...event.touches].find(touch => touch.identifier === touchId)
+                    if (touch == null) {
+                        return
+                    }
+                    let newX = touch.clientX
+                    let newY = touch.clientY
+                    if (firstTouchMove) {
+                        x = newX
+                        y = newY
+                        firstTouchMove = false
+                    }
+                    touchMoveHistory.push([newX, newY])
+                    if (touchMoveHistory.length > 3) {
+                        touchMoveHistory.shift()
+                    }
+                    if (!isTick()) {
+                        return
+                    }
+                    newX = touchMoveHistory.map((p) => p[0]).reduce((a, b) => a + b) / touchMoveHistory.length
+                    newY = touchMoveHistory.map((p) => p[1]).reduce((a, b) => a + b) / touchMoveHistory.length
+                    newX = Math.trunc(newX)
+                    newY = Math.trunc(newY)
+                    const movementX = newX - x
+                    const movementY = newY - y
+                    sendMouseMoveInput(movementX, movementY)
                     x = newX
                     y = newY
                 }
-            } else {
-                sendMouseMoveInput(movementX, movementY)
-                x = newX
-                y = newY
             }
-        }
-        pad.onmouseup = (event) => {
-            if (!scroll.dataset.checked) {
-                if (event.clientX === x && event.clientY === y) {
-                    sendMouseButton1Input()
+            pad.ontouchend = (event) => {
+                event.preventDefault()
+                if (!scroll.dataset.checked) {
+                    const touch = [...event.touches].find(touch => touch.identifier === touchId)
+                    if (touch != null) {
+                        return
+                    }
+                    if (initX === x && initY === y) {
+                        sendMouseButton1Input()
+                    }
+                }
+            }
+            let button1Active = false
+            button1.ontouchstart = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (!button1Active) {
+                    button1Active = true
+                    button1.style.backgroundColor = 'silver'
+                    sendMouseButton1DownInput()
+                }
+            }
+            button1.ontouchend = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (button1Active) {
+                    sendMouseButton1UpInput()
+                    button1.style.backgroundColor = 'white'
+                    button1Active = false
+                }
+            }
+            button1.ontouchcancel = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (button1Active) {
+                    sendMouseButton1UpInput()
+                    button1.style.backgroundColor = 'white'
+                    button1Active = false
+                }
+            }
+            let button2Active = false
+            button2.ontouchstart = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (!button2Active) {
+                    button2Active = true
+                    button2.style.backgroundColor = 'silver'
+                    sendMouseButton2DownInput()
+                }
+            }
+            button2.ontouchend = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (button2Active) {
+                    sendMouseButton2UpInput()
+                    button2.style.backgroundColor = 'white'
+                    button2Active = false
+                }
+            }
+            button2.ontouchcancel = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (button2Active) {
+                    sendMouseButton2UpInput()
+                    button2.style.backgroundColor = 'white'
+                    button2Active = false
+                }
+            }
+            let button3Active = false
+            button3.ontouchstart = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (!button3Active) {
+                    button3Active = true
+                    button3.style.backgroundColor = 'silver'
+                    sendMouseButton3DownInput()
+                }
+            }
+            button3.ontouchend = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (button3Active) {
+                    sendMouseButton3UpInput()
+                    button3.style.backgroundColor = 'white'
+                    button3Active = false
+                }
+            }
+            button3.ontouchcancel = (event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (button3Active) {
+                    sendMouseButton3UpInput()
+                    button3.style.backgroundColor = 'white'
+                    button3Active = false
+                }
+            }
+        } else {
+            for (const elementOnTop of elementsOnTop) {
+                elementOnTop.onmousedown = (event) => event.stopPropagation()
+                elementOnTop.onmousemove = (event) => event.stopPropagation()
+                elementOnTop.onmouseup = (event) => event.stopPropagation()
+            }
+            pad.onmousedown = (event) => {
+                keyboard.blur()
+                lastTickTime = 0
+                x = event.clientX
+                y = event.clientY
+            }
+            const mouseDownButton = 1
+            const scrollThreshold = 25
+            pad.onmousemove = (event) => {
+                if (event.buttons !== mouseDownButton || !isTick()) {
+                    return
+                }
+                const newX = event.clientX
+                const newY = event.clientY
+                const movementX = newX - x
+                const movementY = newY - y
+                if (scroll.dataset.checked) {
+                    let scrollX, scrollY
+                    if (Math.abs(movementX) > scrollThreshold) {
+                        scrollX = movementX > 0 ? 1 : -1
+                    }
+                    if (Math.abs(movementY) > scrollThreshold) {
+                        scrollY = movementY > 0 ? 1 : -1
+                    }
+                    if (scrollX != null || scrollY != null) {
+                        sendScrollInput(scrollX ?? 0, scrollY ?? 0)
+                        x = newX
+                        y = newY
+                    }
+                } else {
+                    sendMouseMoveInput(movementX, movementY)
+                    x = newX
+                    y = newY
+                }
+            }
+            pad.onmouseup = (event) => {
+                if (!scroll.dataset.checked) {
+                    if (event.clientX === x && event.clientY === y) {
+                        sendMouseButton1Input()
+                    }
+                }
+            }
+            let button1Active = false
+            button1.onmousedown = (event) => {
+                event.stopPropagation()
+                if (!button1Active) {
+                    button1Active = true
+                    button1.style.backgroundColor = 'silver'
+                    sendMouseButton1DownInput()
+                }
+            }
+            button1.onmouseup = (event) => {
+                event.stopPropagation()
+                if (button1Active) {
+                    sendMouseButton1UpInput()
+                    button1.style.backgroundColor = 'white'
+                    button1Active = false
+                }
+            }
+            button1.onmouseleave = (event) => {
+                event.stopPropagation()
+                if (button1Active) {
+                    sendMouseButton1UpInput()
+                    button1.style.backgroundColor = 'white'
+                    button1Active = false
+                }
+            }
+            let button2Active = false
+            button2.onmousedown = (event) => {
+                event.stopPropagation()
+                if (!button2Active) {
+                    button2Active = true
+                    button2.style.backgroundColor = 'silver'
+                    sendMouseButton2DownInput()
+                }
+            }
+            button2.onmouseup = (event) => {
+                event.stopPropagation()
+                if (button2Active) {
+                    sendMouseButton2UpInput()
+                    button2.style.backgroundColor = 'white'
+                    button2Active = false
+                }
+            }
+            button2.onmouseleave = (event) => {
+                event.stopPropagation()
+                if (button2Active) {
+                    sendMouseButton2UpInput()
+                    button2.style.backgroundColor = 'white'
+                    button2Active = false
+                }
+            }
+            let button3Active = false
+            button3.onmousedown = (event) => {
+                event.stopPropagation()
+                if (!button3Active) {
+                    button3Active = true
+                    button3.style.backgroundColor = 'silver'
+                    sendMouseButton3DownInput()
+                }
+            }
+            button3.onmouseup = (event) => {
+                event.stopPropagation()
+                if (button3Active) {
+                    sendMouseButton3UpInput()
+                    button3.style.backgroundColor = 'white'
+                    button3Active = false
+                }
+            }
+            button3.onmouseleave = (event) => {
+                event.stopPropagation()
+                if (button3Active) {
+                    sendMouseButton3UpInput()
+                    button3.style.backgroundColor = 'white'
+                    button3Active = false
                 }
             }
         }
-        let touchMoveHistory
-        let firstTouchMove
-        pad.ontouchstart = (event) => {
-            keyboard.blur()
-            lastTickTime = 0
-            const touch = event.touches[0]
-            x = touch.clientX
-            y = touch.clientY
-            if (!scroll.dataset.checked) {
-                touchMoveHistory = []
-                firstTouchMove = true
-            }
+        keyboard.onfocus = () => {
+            keyboard.style.outline = '4px green solid'
         }
-        pad.ontouchmove = (event) => {
+        keyboard.onblur = () => {
+            keyboard.style.outline = '0'
+        }
+        keyboard.oninput = () => {
+            handleKeyboardInput(keyboard.value)
+            keyboard.value = ''
+        }
+        keyboard.onkeydown = (event) => {
             event.preventDefault()
-            if (scroll.dataset.checked) {
-                if (!isTick()) {
-                    return
-                }
-                const touch = event.touches[0]
-                const newX = touch.clientX
-                const newY = touch.clientY
-                const movementX = newX - x
-                const movementY = newY - y
-                let scrollX, scrollY
-                if (Math.abs(movementX) > scrollThreshold) {
-                    scrollX = movementX > 0 ? 1 : -1
-                }
-                if (Math.abs(movementY) > scrollThreshold) {
-                    scrollY = movementY > 0 ? 1 : -1
-                }
-                if (scrollX != null || scrollY != null) {
-                    sendScrollInput(scrollX ?? 0, scrollY ?? 0)
-                    x = newX
-                    y = newY
-                }
-            } else {
-                const touch = event.touches[0]
-                let newX = touch.clientX
-                let newY = touch.clientY
-                if (firstTouchMove) {
-                    x = newX
-                    y = newY
-                    firstTouchMove = false
-                }
-                touchMoveHistory.push([newX, newY])
-                if (touchMoveHistory.length > 3) {
-                    touchMoveHistory.shift()
-                }
-                if (!isTick()) {
-                    return
-                }
-                newX = touchMoveHistory.map((p) => p[0]).reduce((a, b) => a + b) / touchMoveHistory.length
-                newY = touchMoveHistory.map((p) => p[1]).reduce((a, b) => a + b) / touchMoveHistory.length
-                newX = Math.trunc(newX)
-                newY = Math.trunc(newY)
-                const movementX = newX - x
-                const movementY = newY - y
-                sendMouseMoveInput(movementX, movementY)
-                x = newX
-                y = newY
-            }
-        }
-        pad.ontouchend = (event) => {
-            if (!scroll.dataset.checked) {
-                const touch = event.touches[0]
-                if (touch.clientX === x && touch.clientY === y) {
-                    sendMouseButton1Input()
-                }
-            }
-        }
-        const tickInterval = 20
-        /**
-         * @returns {boolean}
-         */
-        const isTick = () => {
-            if (Date.now() - tickInterval > lastTickTime) {
-                lastTickTime = Date.now()
-                return true
-            }
-            return false
+            handleKeyboardKey(event.key)
         }
         scroll.onclick = () => {
             const checked = scroll.dataset.checked
@@ -183,216 +379,175 @@
                 scroll.style.outline = '4px green solid'
             }
         }
-        keyboard.onfocus = () => {
-            keyboard.style.outline = '4px green solid'
-        }
-        keyboard.onblur = () => {
-            keyboard.style.outline = '0'
-        }
-        keyboard.oninput = () => {
-            handleKeyboard(keyboard.value)
-            keyboard.value = ''
-        }
-        keyboard.onkeydown = (event) => {
-            event.preventDefault()
-            handleKeyboard(event.key)
-        }
-        /**
-         * @param {string} keyboardInput
-         */
-        const handleKeyboard = (keyboardInput) => {
-            let keys = [
-                'Escape',
-                'F1',
-                'F2',
-                'F3',
-                'F4',
-                'F5',
-                'F6',
-                'F7',
-                'F8',
-                'F9',
-                'F10',
-                'F11',
-                'F12',
-                'Home',
-                'End',
-                'Insert',
-                'Delete',
-                'Backspace',
-                'Enter',
-                'PageUp',
-                'PageDown',
-                'ArrowUp',
-                'ArrowDown',
-                'ArrowLeft',
-                'ArrowRight',
-                'CapsLock',
-                'Tab',
-            ]
-            let index = keys.findIndex((key) => key === keyboardInput)
-            if (index >= 0) {
-                const keyCode = index + 127
-                sendKeyboardInput(keyCode)
-                return
+    }
+    webSocket.onclose = () => {
+        if (touchScreen) {
+            for (const elementOnTop of elementsOnTop) {
+                elementOnTop.ontouchstart = null
+                elementOnTop.ontouchmove = null
+                elementOnTop.ontouchend = null
             }
-            keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
-            index = keys.indexOf(keyboardInput)
+            pad.ontouchstart = null
+            pad.ontouchmove = null
+            pad.ontouchend = null
+            button1.ontouchstart = null
+            button1.ontouchend = null
+            button1.ontouchcancel = null
+            button2.ontouchstart = null
+            button2.ontouchend = null
+            button2.ontouchcancel = null
+            button3.ontouchstart = null
+            button3.ontouchend = null
+            button3.ontouchcancel = null
+        } else {
+            for (const elementOnTop of elementsOnTop) {
+                elementOnTop.onmousedown = null
+                elementOnTop.onmousemove = null
+                elementOnTop.onmouseup = null
+            }
+            pad.onmousedown = null
+            pad.onmousemove = null
+            pad.onmouseup = null
+            button1.onmousedown = null
+            button1.onmouseup = null
+            button1.onmouseleave = null
+            button2.onmousedown = null
+            button2.onmouseup = null
+            button2.onmouseleave = null
+            button3.onmousedown = null
+            button3.onmouseup = null
+            button3.onmouseleave = null
+        }
+        keyboard.onfocus = null
+        keyboard.onblur = null
+        keyboard.oninput = null
+        keyboard.onkeydown = null
+        scroll.onclick = null
+    }
+    const tickInterval = 20
+    /**
+     * @returns {boolean}
+     */
+    const isTick = () => {
+        if (Date.now() - tickInterval > lastTickTime) {
+            lastTickTime = Date.now()
+            return true
+        }
+        return false
+    }
+    /**
+     * @param {string} keyboardInput
+     */
+    const handleKeyboardInput = (keyboardInput) => {
+        for (const key of keyboardInput.split('')) {
+            let keys = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+            let index = keys.indexOf(key)
             if (index >= 0) {
                 const keyCode = index + 32
                 sendKeyboardInput(keyCode)
-                return
+                continue
             }
             keys = 'xĄxŁxxŚxxxxxŹxxŻxąxłxxśxxxxxźxxżxxxxxxĆxxxĘxxxxxxŃxÓxxxxxxxxxxxxxxxxxxćxxxęxxxxxxńxó'
-            index = keys.indexOf(keyboardInput)
+            index = keys.indexOf(key)
             if (index >= 0) {
                 const keyCode = index + 160
                 sendKeyboardInput(keyCode)
             }
         }
-        let button1Active = false
-        button1.onmousedown = () => {
-            if (!button1Active) {
-                button1Active = true
-                button1.style.backgroundColor = 'silver'
-                sendMouseButton1DownInput()
-            }
-        }
-        button1.onmouseup = () => {
-            if (button1Active) {
-                sendMouseButton1UpInput()
-                button1.style.backgroundColor = 'white'
-                button1Active = false
-            }
-        }
-        button1.onmouseleave = () => {
-            if (button1Active) {
-                sendMouseButton1UpInput()
-                button1.style.backgroundColor = 'white'
-                button1Active = false
-            }
-        }
-        let button2Active = false
-        button2.onmousedown = () => {
-            if (!button2Active) {
-                button2Active = true
-                button2.style.backgroundColor = 'silver'
-                sendMouseButton2DownInput()
-            }
-        }
-        button2.onmouseup = () => {
-            if (button2Active) {
-                sendMouseButton2UpInput()
-                button2.style.backgroundColor = 'white'
-                button2Active = false
-            }
-        }
-        button2.onmouseleave = () => {
-            if (button2Active) {
-                sendMouseButton2UpInput()
-                button2.style.backgroundColor = 'white'
-                button2Active = false
-            }
-        }
-        let button3Active = false
-        button3.onmousedown = () => {
-            if (!button3Active) {
-                button3Active = true
-                button3.style.backgroundColor = 'silver'
-                sendMouseButton3DownInput()
-            }
-        }
-        button3.onmouseup = () => {
-            if (button3Active) {
-                sendMouseButton3UpInput()
-                button3.style.backgroundColor = 'white'
-                button3Active = false
-            }
-        }
-        button3.onmouseleave = () => {
-            if (button3Active) {
-                sendMouseButton3UpInput()
-                button3.style.backgroundColor = 'white'
-                button3Active = false
-            }
-        }
-        /**
-         * @param {number} movementX
-         * @param {number} movementY
-         */
-        const sendMouseMoveInput = (movementX, movementY) => {
-            movementX = Math.max(0, Math.min(255, movementX + 128))
-            movementY = Math.max(0, Math.min(255, movementY + 128))
-            const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
-            webSocket.send(bytes)
-        }
-        const sendMouseButton1Input = () => {
-            const bytes = new Uint8Array([input.mouseButton1])
-            webSocket.send(bytes)
-        }
-        /**
-         * @param {number} scrollX
-         * @param {number} scrollY
-         */
-        const sendScrollInput = (scrollX, scrollY) => {
-            scrollX = Math.max(0, Math.min(255, scrollX + 128))
-            scrollY = Math.max(0, Math.min(255, scrollY + 128))
-            const bytes = new Uint8Array([input.scroll, scrollX, scrollY])
-            webSocket.send(bytes)
-        }
-        /**
-         * @param {number} keyCode
-         */
-        const sendKeyboardInput = (keyCode) => {
-            const bytes = new Uint8Array([input.keyboard, keyCode])
-            webSocket.send(bytes)
-        }
-        const sendMouseButton1DownInput = () => {
-            const bytes = new Uint8Array([input.mouseButton1Down])
-            webSocket.send(bytes)
-        }
-        const sendMouseButton1UpInput = () => {
-            const bytes = new Uint8Array([input.mouseButton1Up])
-            webSocket.send(bytes)
-        }
-        const sendMouseButton2DownInput = () => {
-            const bytes = new Uint8Array([input.mouseButton2Down])
-            webSocket.send(bytes)
-        }
-        const sendMouseButton2UpInput = () => {
-            const bytes = new Uint8Array([input.mouseButton2Up])
-            webSocket.send(bytes)
-        }
-        const sendMouseButton3DownInput = () => {
-            const bytes = new Uint8Array([input.mouseButton3Down])
-            webSocket.send(bytes)
-        }
-        const sendMouseButton3UpInput = () => {
-            const bytes = new Uint8Array([input.mouseButton3Up])
-            webSocket.send(bytes)
+    }
+    /**
+     * @param {string} keyboardKey
+     */
+    const handleKeyboardKey = (keyboardKey) => {
+        const keys = [
+            'Escape',
+            'F1',
+            'F2',
+            'F3',
+            'F4',
+            'F5',
+            'F6',
+            'F7',
+            'F8',
+            'F9',
+            'F10',
+            'F11',
+            'F12',
+            'Home',
+            'End',
+            'Insert',
+            'Delete',
+            'Backspace',
+            'Enter',
+            'PageUp',
+            'PageDown',
+            'ArrowUp',
+            'ArrowDown',
+            'ArrowLeft',
+            'ArrowRight',
+            'CapsLock',
+            'Tab',
+        ]
+        const index = keys.findIndex((key) => key === keyboardKey)
+        if (index >= 0) {
+            const keyCode = index + 127
+            sendKeyboardInput(keyCode)
         }
     }
-    webSocket.onclose = () => {
-        pad.onmousedown = null
-        pad.onmousemove = null
-        pad.onmouseup = null
-        pad.ontouchstart = null
-        pad.ontouchmove = null
-        pad.ontouchend = null
-        scroll.onclick = null
-        keyboard.onfocus = null
-        keyboard.onblur = null
-        keyboard.oninput = null
-        keyboard.onkeydown = null
-        button1.onmousedown = null
-        button1.onmouseup = null
-        button1.onmouseleave = null
-        button2.onmousedown = null
-        button2.onmouseup = null
-        button2.onmouseleave = null
-        button3.onmousedown = null
-        button3.onmouseup = null
-        button3.onmouseleave = null
+    /**
+     * @param {number} scrollX
+     * @param {number} scrollY
+     */
+    const sendScrollInput = (scrollX, scrollY) => {
+        scrollX = Math.max(0, Math.min(255, scrollX + 128))
+        scrollY = Math.max(0, Math.min(255, scrollY + 128))
+        const bytes = new Uint8Array([input.scroll, scrollX, scrollY])
+        webSocket.send(bytes)
+    }
+    /**
+     * @param {number} movementX
+     * @param {number} movementY
+     */
+    const sendMouseMoveInput = (movementX, movementY) => {
+        movementX = Math.max(0, Math.min(255, movementX + 128))
+        movementY = Math.max(0, Math.min(255, movementY + 128))
+        const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
+        webSocket.send(bytes)
+    }
+    const sendMouseButton1Input = () => {
+        const bytes = new Uint8Array([input.mouseButton1])
+        webSocket.send(bytes)
+    }
+    /**
+     * @param {number} keyCode
+     */
+    const sendKeyboardInput = (keyCode) => {
+        const bytes = new Uint8Array([input.keyboard, keyCode])
+        webSocket.send(bytes)
+    }
+    const sendMouseButton1DownInput = () => {
+        const bytes = new Uint8Array([input.mouseButton1Down])
+        webSocket.send(bytes)
+    }
+    const sendMouseButton1UpInput = () => {
+        const bytes = new Uint8Array([input.mouseButton1Up])
+        webSocket.send(bytes)
+    }
+    const sendMouseButton2DownInput = () => {
+        const bytes = new Uint8Array([input.mouseButton2Down])
+        webSocket.send(bytes)
+    }
+    const sendMouseButton2UpInput = () => {
+        const bytes = new Uint8Array([input.mouseButton2Up])
+        webSocket.send(bytes)
+    }
+    const sendMouseButton3DownInput = () => {
+        const bytes = new Uint8Array([input.mouseButton3Down])
+        webSocket.send(bytes)
+    }
+    const sendMouseButton3UpInput = () => {
+        const bytes = new Uint8Array([input.mouseButton3Up])
+        webSocket.send(bytes)
     }
 </script>
 </body>
