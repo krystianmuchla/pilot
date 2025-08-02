@@ -5,19 +5,19 @@ import (
 	"net/http"
 )
 
-type HttpController struct {
+type MainController struct {
 	template *template.Template
 }
 
-func NewHttpController() (*HttpController, error) {
+func NewMainController() (*MainController, error) {
 	temp, err := template.ParseFiles("web/index.html")
 	if err != nil {
 		return nil, err
 	}
-	return &HttpController{template: temp}, nil
+	return &MainController{template: temp}, nil
 }
 
-func (controller HttpController) Handle(responseWriter http.ResponseWriter, request *http.Request) error {
+func (controller MainController) Handle(responseWriter http.ResponseWriter, request *http.Request) error {
 	if request.RequestURI != "/" {
 		responseWriter.Header().Set("Location", "/")
 		responseWriter.WriteHeader(http.StatusFound)

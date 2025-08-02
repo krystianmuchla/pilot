@@ -4,11 +4,11 @@ import "net/http"
 
 type Handler struct {
 	webSocketController *WebSocketController
-	httpController      *HttpController
+	mainController      *MainController
 }
 
-func NewHandler(webSocketController *WebSocketController, httpController *HttpController) *Handler {
-	return &Handler{webSocketController: webSocketController, httpController: httpController}
+func NewHandler(webSocketController *WebSocketController, mainController *MainController) *Handler {
+	return &Handler{webSocketController: webSocketController, mainController: mainController}
 }
 
 func (handler *Handler) ServeHTTP(responseWriter http.ResponseWriter, request *http.Request) {
@@ -16,7 +16,7 @@ func (handler *Handler) ServeHTTP(responseWriter http.ResponseWriter, request *h
 	if isWebSocketHandshake(request) {
 		err = handler.webSocketController.Handle(responseWriter, request)
 	} else {
-		err = handler.httpController.Handle(responseWriter, request)
+		err = handler.mainController.Handle(responseWriter, request)
 	}
 	if err != nil {
 		println(err.Error())

@@ -15,10 +15,10 @@ func ResolveDependencies() (*logic.MouseController, *logic.KeyboardController, *
 		return mouseController, nil, nil, err
 	}
 	webSocketController := http.NewWebSocketController(mouseController, keyboardController)
-	httpController, err := http.NewHttpController()
+	mainController, err := http.NewMainController()
 	if err != nil {
 		return mouseController, keyboardController, nil, err
 	}
-	httpHandler := http.NewHandler(webSocketController, httpController)
+	httpHandler := http.NewHandler(webSocketController, mainController)
 	return mouseController, keyboardController, httpHandler, nil
 }
