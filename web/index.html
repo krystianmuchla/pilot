@@ -238,11 +238,14 @@
                 elementOnTop.onmousemove = (event) => event.stopPropagation()
                 elementOnTop.onmouseup = (event) => event.stopPropagation()
             }
+            let initX, initY
             pad.onmousedown = (event) => {
                 keyboard.blur()
                 lastTickTime = 0
-                x = event.clientX
-                y = event.clientY
+                initX = event.clientX
+                initY = event.clientY
+                x = initX
+                y = initY
             }
             const mouseDownButton = 1
             const scrollThreshold = 25
@@ -273,9 +276,9 @@
                     y = newY
                 }
             }
-            pad.onmouseup = (event) => {
+            pad.onmouseup = () => {
                 if (!scroll.dataset.checked) {
-                    if (event.clientX === x && event.clientY === y) {
+                    if (initX === x && initY === y) {
                         sendMouseButton1Input()
                     }
                 }
