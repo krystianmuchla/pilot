@@ -51,376 +51,212 @@
         mouseButton3Down: 8,
         mouseButton3Up: 9,
     }
-    let x, y
     let lastTickTime
     webSocket.onopen = () => {
-        if (touchScreen) {
-            for (const elementOnTop of elementsOnTop) {
-                elementOnTop.ontouchstart = (event) => event.stopPropagation()
-                elementOnTop.ontouchmove = (event) => event.stopPropagation()
-                elementOnTop.ontouchend = (event) => event.stopPropagation()
+        for (const elementOnTop of elementsOnTop) {
+            elementOnTop.onpointerdown = (event) => event.stopPropagation()
+            elementOnTop.onpointermove = (event) => event.stopPropagation()
+            elementOnTop.onpointerup = (event) => event.stopPropagation()
+        }
+        let initX, initY
+        let x, y
+        let pointerId
+        let moveHistory
+        pad.onpointerdown = (event) => {
+            keyboard.blur()
+            lastTickTime = 0
+            initX = event.clientX
+            initY = event.clientY
+            x = initX
+            y = initY
+            pointerId = event.pointerId
+            moveHistory = []
+        }
+        const scrollThreshold = 25
+        pad.ontouchmove = (event) => {
+            event.preventDefault()
+        }
+        pad.onpointermove = (event) => {
+            if (event.pointerId !== pointerId) {
+                return
             }
-            let initX, initY
-            let touchMoveHistory
-            let firstTouchMove
-            let touchId
-            pad.ontouchstart = (event) => {
-                event.preventDefault()
-                keyboard.blur()
-                lastTickTime = 0
-                const touch = event.touches[event.touches.length - 1]
-                initX = touch.clientX
-                initY = touch.clientY
-                x = initX
-                y = initY
-                touchId = touch.identifier
-                if (!scroll.dataset.checked) {
-                    touchMoveHistory = []
-                    firstTouchMove = true
-                }
-            }
-            const scrollThreshold = 25
-            pad.ontouchmove = (event) => {
-                event.preventDefault()
-                if (scroll.dataset.checked) {
-                    if (!isTick()) {
-                        return
-                    }
-                    const touch = [...event.touches].find(touch => touch.identifier === touchId)
-                    if (touch == null) {
-                        return
-                    }
-                    const newX = touch.clientX
-                    const newY = touch.clientY
-                    const movementX = newX - x
-                    const movementY = newY - y
-                    let scrollX, scrollY
-                    if (Math.abs(movementX) > scrollThreshold) {
-                        scrollX = movementX > 0 ? 1 : -1
-                    }
-                    if (Math.abs(movementY) > scrollThreshold) {
-                        scrollY = movementY > 0 ? 1 : -1
-                    }
-                    if (scrollX != null || scrollY != null) {
-                        sendScrollInput(scrollX ?? 0, scrollY ?? 0)
-                        x = newX
-                        y = newY
-                    }
-                } else {
-                    const touch = [...event.touches].find(touch => touch.identifier === touchId)
-                    if (touch == null) {
-                        return
-                    }
-                    let newX = touch.clientX
-                    let newY = touch.clientY
-                    if (firstTouchMove) {
-                        x = newX
-                        y = newY
-                        firstTouchMove = false
-                    }
-                    touchMoveHistory.push([newX, newY])
-                    if (touchMoveHistory.length > 3) {
-                        touchMoveHistory.shift()
-                    }
-                    if (!isTick()) {
-                        return
-                    }
-                    newX = touchMoveHistory.map((p) => p[0]).reduce((a, b) => a + b) / touchMoveHistory.length
-                    newY = touchMoveHistory.map((p) => p[1]).reduce((a, b) => a + b) / touchMoveHistory.length
-                    newX = Math.trunc(newX)
-                    newY = Math.trunc(newY)
-                    const movementX = newX - x
-                    const movementY = newY - y
-                    sendMouseMoveInput(movementX, movementY)
-                    x = newX
-                    y = newY
-                }
-            }
-            pad.ontouchend = (event) => {
-                event.preventDefault()
-                if (!scroll.dataset.checked) {
-                    const touch = [...event.touches].find(touch => touch.identifier === touchId)
-                    if (touch != null) {
-                        return
-                    }
-                    if (initX === x && initY === y) {
-                        sendMouseButton1Input()
-                    }
-                }
-            }
-            let button1Active = false
-            button1.ontouchstart = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (!button1Active) {
-                    button1Active = true
-                    button1.style.backgroundColor = 'silver'
-                    sendMouseButton1DownInput()
-                }
-            }
-            button1.ontouchend = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (button1Active) {
-                    sendMouseButton1UpInput()
-                    button1.style.backgroundColor = 'white'
-                    button1Active = false
-                }
-            }
-            button1.ontouchcancel = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (button1Active) {
-                    sendMouseButton1UpInput()
-                    button1.style.backgroundColor = 'white'
-                    button1Active = false
-                }
-            }
-            let button2Active = false
-            button2.ontouchstart = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (!button2Active) {
-                    button2Active = true
-                    button2.style.backgroundColor = 'silver'
-                    sendMouseButton2DownInput()
-                }
-            }
-            button2.ontouchend = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (button2Active) {
-                    sendMouseButton2UpInput()
-                    button2.style.backgroundColor = 'white'
-                    button2Active = false
-                }
-            }
-            button2.ontouchcancel = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (button2Active) {
-                    sendMouseButton2UpInput()
-                    button2.style.backgroundColor = 'white'
-                    button2Active = false
-                }
-            }
-            let button3Active = false
-            button3.ontouchstart = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (!button3Active) {
-                    button3Active = true
-                    button3.style.backgroundColor = 'silver'
-                    sendMouseButton3DownInput()
-                }
-            }
-            button3.ontouchend = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (button3Active) {
-                    sendMouseButton3UpInput()
-                    button3.style.backgroundColor = 'white'
-                    button3Active = false
-                }
-            }
-            button3.ontouchcancel = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (button3Active) {
-                    sendMouseButton3UpInput()
-                    button3.style.backgroundColor = 'white'
-                    button3Active = false
-                }
-            }
-        } else {
-            for (const elementOnTop of elementsOnTop) {
-                elementOnTop.onmousedown = (event) => event.stopPropagation()
-                elementOnTop.onmousemove = (event) => event.stopPropagation()
-                elementOnTop.onmouseup = (event) => event.stopPropagation()
-            }
-            let initX, initY
-            pad.onmousedown = (event) => {
-                keyboard.blur()
-                lastTickTime = 0
-                initX = event.clientX
-                initY = event.clientY
-                x = initX
-                y = initY
-            }
-            const mouseDownButton = 1
-            const scrollThreshold = 25
-            pad.onmousemove = (event) => {
-                if (event.buttons !== mouseDownButton || !isTick()) {
+            let newX = event.clientX
+            let newY = event.clientY
+            if (scroll.dataset.checked) {
+                if (!isTick()) {
                     return
                 }
-                const newX = event.clientX
-                const newY = event.clientY
                 const movementX = newX - x
                 const movementY = newY - y
-                if (scroll.dataset.checked) {
-                    let scrollX, scrollY
-                    if (Math.abs(movementX) > scrollThreshold) {
-                        scrollX = movementX > 0 ? 1 : -1
-                    }
-                    if (Math.abs(movementY) > scrollThreshold) {
-                        scrollY = movementY > 0 ? 1 : -1
-                    }
-                    if (scrollX != null || scrollY != null) {
-                        sendScrollInput(scrollX ?? 0, scrollY ?? 0)
-                        x = newX
-                        y = newY
-                    }
-                } else {
-                    sendMouseMoveInput(movementX, movementY)
+                let scrollX, scrollY
+                if (Math.abs(movementX) > scrollThreshold) {
+                    scrollX = movementX > 0 ? 1 : -1
+                }
+                if (Math.abs(movementY) > scrollThreshold) {
+                    scrollY = movementY > 0 ? 1 : -1
+                }
+                if (scrollX != null || scrollY != null) {
+                    sendScrollInput(scrollX ?? 0, scrollY ?? 0)
                     x = newX
                     y = newY
                 }
-            }
-            pad.onmouseup = () => {
-                if (!scroll.dataset.checked) {
-                    if (initX === x && initY === y) {
-                        sendMouseButton1Input()
+            } else {
+                if (touchScreen) {
+                    if (moveHistory.length === 0) {
+                        x = newX
+                        y = newY
+                    }
+                    moveHistory.push([newX, newY])
+                    if (moveHistory.length > 3) {
+                        moveHistory.shift()
+                    }
+                    if (!isTick()) {
+                        return
+                    }
+                    newX = moveHistory.map((p) => p[0]).reduce((a, b) => a + b) / moveHistory.length
+                    newY = moveHistory.map((p) => p[1]).reduce((a, b) => a + b) / moveHistory.length
+                    newX = Math.trunc(newX)
+                    newY = Math.trunc(newY)
+                } else {
+                    if (!isTick()) {
+                        return
                     }
                 }
+                const movementX = newX - x
+                const movementY = newY - y
+                sendMouseMoveInput(movementX, movementY)
+                x = newX
+                y = newY
             }
-            let button1Active = false
-            button1.onmousedown = (event) => {
-                event.stopPropagation()
-                if (!button1Active) {
-                    button1Active = true
-                    button1.style.backgroundColor = 'silver'
-                    sendMouseButton1DownInput()
-                }
+        }
+        pad.onpointerup = (event) => {
+            if (event.pointerId !== pointerId) {
+                return
             }
-            button1.onmouseup = (event) => {
-                event.stopPropagation()
-                if (button1Active) {
-                    sendMouseButton1UpInput()
-                    button1.style.backgroundColor = 'white'
-                    button1Active = false
-                }
-            }
-            button1.onmouseleave = (event) => {
-                event.stopPropagation()
-                if (button1Active) {
-                    sendMouseButton1UpInput()
-                    button1.style.backgroundColor = 'white'
-                    button1Active = false
-                }
-            }
-            let button2Active = false
-            button2.onmousedown = (event) => {
-                event.stopPropagation()
-                if (!button2Active) {
-                    button2Active = true
-                    button2.style.backgroundColor = 'silver'
-                    sendMouseButton2DownInput()
-                }
-            }
-            button2.onmouseup = (event) => {
-                event.stopPropagation()
-                if (button2Active) {
-                    sendMouseButton2UpInput()
-                    button2.style.backgroundColor = 'white'
-                    button2Active = false
-                }
-            }
-            button2.onmouseleave = (event) => {
-                event.stopPropagation()
-                if (button2Active) {
-                    sendMouseButton2UpInput()
-                    button2.style.backgroundColor = 'white'
-                    button2Active = false
-                }
-            }
-            let button3Active = false
-            button3.onmousedown = (event) => {
-                event.stopPropagation()
-                if (!button3Active) {
-                    button3Active = true
-                    button3.style.backgroundColor = 'silver'
-                    sendMouseButton3DownInput()
-                }
-            }
-            button3.onmouseup = (event) => {
-                event.stopPropagation()
-                if (button3Active) {
-                    sendMouseButton3UpInput()
-                    button3.style.backgroundColor = 'white'
-                    button3Active = false
-                }
-            }
-            button3.onmouseleave = (event) => {
-                event.stopPropagation()
-                if (button3Active) {
-                    sendMouseButton3UpInput()
-                    button3.style.backgroundColor = 'white'
-                    button3Active = false
+            pointerId = null
+            if (!scroll.dataset.checked) {
+                if (initX === x && initY === y) {
+                    sendMouseButton1Input()
                 }
             }
         }
-        keyboard.onfocus = () => {
-            keyboard.style.outline = '4px green solid'
+        let button1Active = false
+        button1.onpointerdown = (event) => {
+            event.stopPropagation()
+            if (!button1Active) {
+                button1Active = true
+                button1.style.backgroundColor = 'silver'
+                sendMouseButton1DownInput()
+            }
         }
-        keyboard.onblur = () => {
-            keyboard.style.outline = '0'
+        button1.onpointerup = (event) => {
+            event.stopPropagation()
+            if (button1Active) {
+                sendMouseButton1UpInput()
+                button1.style.backgroundColor = 'white'
+                button1Active = false
+            }
         }
-        keyboard.oninput = () => {
-            handleKeyboardInput(keyboard.value)
-            keyboard.value = ''
+        button1.onpointerleave = (event) => {
+            event.stopPropagation()
+            if (button1Active) {
+                sendMouseButton1UpInput()
+                button1.style.backgroundColor = 'white'
+                button1Active = false
+            }
         }
-        keyboard.onkeydown = (event) => {
-            handleKeyboardKey(event.key)
+        let button2Active = false
+        button2.onpointerdown = (event) => {
+            event.stopPropagation()
+            if (!button2Active) {
+                button2Active = true
+                button2.style.backgroundColor = 'silver'
+                sendMouseButton2DownInput()
+            }
         }
-        scroll.onclick = () => {
-            const checked = scroll.dataset.checked
-            if (checked) {
-                scroll.dataset.checked = ''
-                scroll.style.outline = '0'
-            } else {
-                scroll.dataset.checked = 'true'
-                scroll.style.outline = '4px green solid'
+        button2.onpointerup = (event) => {
+            event.stopPropagation()
+            if (button2Active) {
+                sendMouseButton2UpInput()
+                button2.style.backgroundColor = 'white'
+                button2Active = false
+            }
+        }
+        button2.onpointerleave = (event) => {
+            event.stopPropagation()
+            if (button2Active) {
+                sendMouseButton2UpInput()
+                button2.style.backgroundColor = 'white'
+                button2Active = false
+            }
+        }
+        let button3Active = false
+        button3.onpointerdown = (event) => {
+            event.stopPropagation()
+            if (!button3Active) {
+                button3Active = true
+                button3.style.backgroundColor = 'silver'
+                sendMouseButton3DownInput()
+            }
+        }
+        button3.onpointerup = (event) => {
+            event.stopPropagation()
+            if (button3Active) {
+                sendMouseButton3UpInput()
+                button3.style.backgroundColor = 'white'
+                button3Active = false
+            }
+        }
+        button3.onpointerleave = (event) => {
+            event.stopPropagation()
+            if (button3Active) {
+                sendMouseButton3UpInput()
+                button3.style.backgroundColor = 'white'
+                button3Active = false
             }
         }
     }
-    webSocket.onclose = () => {
-        if (touchScreen) {
-            for (const elementOnTop of elementsOnTop) {
-                elementOnTop.ontouchstart = null
-                elementOnTop.ontouchmove = null
-                elementOnTop.ontouchend = null
-            }
-            pad.ontouchstart = null
-            pad.ontouchmove = null
-            pad.ontouchend = null
-            button1.ontouchstart = null
-            button1.ontouchend = null
-            button1.ontouchcancel = null
-            button2.ontouchstart = null
-            button2.ontouchend = null
-            button2.ontouchcancel = null
-            button3.ontouchstart = null
-            button3.ontouchend = null
-            button3.ontouchcancel = null
+    keyboard.onfocus = () => {
+        keyboard.style.outline = '4px green solid'
+    }
+    keyboard.onblur = () => {
+        keyboard.style.outline = '0'
+    }
+    keyboard.oninput = () => {
+        handleKeyboardInput(keyboard.value)
+        keyboard.value = ''
+    }
+    keyboard.onkeydown = (event) => {
+        handleKeyboardKey(event.key)
+    }
+    scroll.onclick = () => {
+        const checked = scroll.dataset.checked
+        if (checked) {
+            scroll.dataset.checked = ''
+            scroll.style.outline = '0'
         } else {
-            for (const elementOnTop of elementsOnTop) {
-                elementOnTop.onmousedown = null
-                elementOnTop.onmousemove = null
-                elementOnTop.onmouseup = null
-            }
-            pad.onmousedown = null
-            pad.onmousemove = null
-            pad.onmouseup = null
-            button1.onmousedown = null
-            button1.onmouseup = null
-            button1.onmouseleave = null
-            button2.onmousedown = null
-            button2.onmouseup = null
-            button2.onmouseleave = null
-            button3.onmousedown = null
-            button3.onmouseup = null
-            button3.onmouseleave = null
+            scroll.dataset.checked = 'true'
+            scroll.style.outline = '4px green solid'
         }
+    }
+    webSocket.onclose = () => {
+        for (const elementOnTop of elementsOnTop) {
+            elementOnTop.onpointerdown = null
+            elementOnTop.onpointermove = null
+            elementOnTop.onpointerup = null
+        }
+        pad.onpointerdown = null
+        pad.onpointermove = null
+        pad.onpointerup = null
+        button1.onpointerdown = null
+        button1.onpointerup = null
+        button1.onpointerleave = null
+        button2.onpointerdown = null
+        button2.onpointerup = null
+        button2.onpointerleave = null
+        button3.onpointerdown = null
+        button3.onpointerup = null
+        button3.onpointerleave = null
         keyboard.onfocus = null
         keyboard.onblur = null
         keyboard.oninput = null
