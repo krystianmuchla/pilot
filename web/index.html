@@ -7,7 +7,7 @@
 </head>
 <body style="background-color: black; margin: 0">
 <div id="pad"
-     style="display: grid; grid-template: 'a . b' auto '. . .' 1fr 'c c c' auto / auto 1fr auto; height: 100%; position: fixed; width: 100%">
+     style="display: grid; grid-template: 'a . b' auto '. . .' 1fr 'c c c' auto / auto 1fr auto; height: 100%; position: fixed; touch-action: pan-up; width: 100%">
     <div style="align-content: center; align-items: center; display: grid; grid-area: a; height: 40px; justify-items: center; margin: 10px; position: relative; width: 40px">
         <input id="keyboard"
                style="background-color: white; border: 0; box-sizing: border-box; border-radius: 50%; caret-color: transparent; cursor: pointer; height: 100%; outline: 0; position: absolute; width: 100%"/>
@@ -53,6 +53,7 @@
     }
     let lastTickTime
     webSocket.onopen = () => {
+        pad.style.touchAction = 'none'
         for (const elementOnTop of elementsOnTop) {
             elementOnTop.onpointerdown = (event) => event.stopPropagation()
             elementOnTop.onpointermove = (event) => event.stopPropagation()
@@ -73,9 +74,6 @@
             moveHistory = []
         }
         const scrollThreshold = 25
-        pad.ontouchmove = (event) => {
-            event.preventDefault()
-        }
         pad.onpointermove = (event) => {
             if (event.pointerId !== pointerId) {
                 return
@@ -240,13 +238,13 @@
         }
     }
     webSocket.onclose = () => {
+        pad.style.touchAction = 'pan-up'
         for (const elementOnTop of elementsOnTop) {
             elementOnTop.onpointerdown = null
             elementOnTop.onpointermove = null
             elementOnTop.onpointerup = null
         }
         pad.onpointerdown = null
-        pad.ontouchmove = null
         pad.onpointermove = null
         pad.onpointerup = null
         button1.onpointerdown = null
