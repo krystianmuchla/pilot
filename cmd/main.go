@@ -13,7 +13,9 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting server")
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	fmt.Println("Starting HTTP server...")
 	var httpServer *http.Server
 	mouseController, keyboardController, httpHandler, err := application.ResolveDependencies()
 	if err != nil {
@@ -30,41 +32,32 @@ func main() {
 			}
 		}()
 	}
-	shutdown := shutdownGracefully(httpServer, mouseController, keyboardController)
-	<-shutdown
+    fmt.Println("HTTP server started")
+	<-ctx.Done()
+	shutdown(httpServer, mouseController, keyboardController)
 }
 
-func shutdownGracefully(
+func shutdown(
 	httpServer *http.Server,
 	mouseController *logic.MouseController,
-	keyboardController *logic.KeyboardController) <-chan struct{} {
-	shutdown := make(chan struct{})
-	go func() {
-		osSignal := make(chan os.Signal, 1)
-		signal.Notify(osSignal, syscall.SIGINT, syscall.SIGTERM)
-		<-osSignal
-		fmt.Println("Shutting down gracefully...")
-		if httpServer != nil {
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
-			err := httpServer.Shutdown(ctx)
-			if err != nil {
-				println(err.Error())
-			}
+	keyboardController *logic.KeyboardController,
+) {
+	fmt.Println("Shutting down...")
+	if httpServer != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := httpServer.Shutdown(ctx); err != nil {
+			println(err.Error())
 		}
-		if mouseController != nil {
-			err := mouseController.Stop()
-			if err != nil {
-				println(err.Error())
-			}
+	}
+	if mouseController != nil {
+		if err := mouseController.Stop(); err != nil {
+			println(err.Error())
 		}
-		if keyboardController != nil {
-			err := keyboardController.Stop()
-			if err != nil {
-				println(err.Error())
-			}
+	}
+	if keyboardController != nil {
+		if err := keyboardController.Stop(); err != nil {
+			println(err.Error())
 		}
-		close(shutdown)
-	}()
-	return shutdown
+	}
 }
