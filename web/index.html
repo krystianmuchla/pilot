@@ -30,6 +30,7 @@
     </div>
 </div>
 <script>
+    /** @type {WebSocket | undefined} */
     let webSocket
     const pad = document.getElementById('pad')
     const scroll = document.getElementById('scroll')
@@ -38,6 +39,7 @@
     const button2 = document.getElementById('button2')
     const button3 = document.getElementById('button3')
     for (const elementOnTop of [scroll, keyboard, button1, button2, button3]) {
+        elementOnTop.ontouchstart = (event) => event.stopPropagation()
         elementOnTop.onpointerdown = (event) => event.stopPropagation()
         elementOnTop.onpointermove = (event) => event.stopPropagation()
         elementOnTop.onpointerup = (event) => event.stopPropagation()
@@ -86,11 +88,16 @@
             scroll.style.outline = '4px green solid'
         }
     }
+    /** @type {number} */
     let lastTickTime
+    /** @type {number} */
     let initX, initY
+    /** @type {number} */
     let x, y
+    /** @type {number | undefined | null} */
     let pointerId
-    let moveHistory
+    /** @type {number[][]} */
+    let moveHistory = []
     pad.onpointerdown = (event) => {
         keyboard.blur()
         lastTickTime = 0
@@ -114,6 +121,7 @@
             }
             const movementX = newX - x
             const movementY = newY - y
+            /** @type {number | undefined} */
             let scrollX, scrollY
             if (Math.abs(movementX) > scrollThreshold) {
                 scrollX = movementX > 0 ? 1 : -1
