@@ -9,7 +9,7 @@
 <div id="pad"
      style="display: grid; grid-template: 'a . b' auto '. . .' 1fr 'c c c' auto / auto 1fr auto; height: 100%; position: fixed; width: 100%">
     <div style="align-content: center; align-items: center; display: grid; grid-area: a; height: 40px; justify-items: center; margin: 10px; position: relative; width: 40px">
-        <input id="keyboard"
+        <input id="keyboard" autocapitalize="off" autocorrect="off"
                style="background-color: white; border: 0; box-sizing: border-box; border-radius: 50%; caret-color: transparent; cursor: pointer; height: 100%; outline: 0; position: absolute; width: 100%"/>
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
              style="pointer-events: none; position: absolute">
@@ -63,7 +63,7 @@
             if (isWebSocketOpen())
                 event.preventDefault()
         },
-        { passive: false },
+        {passive: false},
     )
     keyboard.onfocus = () => {
         keyboard.style.outline = '4px green solid'
@@ -110,25 +110,21 @@
     }
     const scrollThreshold = 25
     pad.onpointermove = (event) => {
-        if (event.pointerId !== pointerId) {
+        if (event.pointerId !== pointerId)
             return
-        }
         let newX = event.clientX
         let newY = event.clientY
         if (scroll.dataset.checked) {
-            if (!isTick()) {
+            if (!isTick())
                 return
-            }
             const movementX = newX - x
             const movementY = newY - y
             /** @type {number | undefined} */
             let scrollX, scrollY
-            if (Math.abs(movementX) > scrollThreshold) {
+            if (Math.abs(movementX) > scrollThreshold)
                 scrollX = movementX > 0 ? 1 : -1
-            }
-            if (Math.abs(movementY) > scrollThreshold) {
+            if (Math.abs(movementY) > scrollThreshold)
                 scrollY = movementY > 0 ? 1 : -1
-            }
             if (scrollX != null || scrollY != null) {
                 sendScrollInput(scrollX ?? 0, scrollY ?? 0)
                 x = newX
@@ -141,20 +137,17 @@
                     y = newY
                 }
                 moveHistory.push([newX, newY])
-                if (moveHistory.length > 3) {
+                if (moveHistory.length > 3)
                     moveHistory.shift()
-                }
-                if (!isTick()) {
+                if (!isTick())
                     return
-                }
                 newX = moveHistory.map((p) => p[0]).reduce((a, b) => a + b) / moveHistory.length
                 newY = moveHistory.map((p) => p[1]).reduce((a, b) => a + b) / moveHistory.length
                 newX = Math.trunc(newX)
                 newY = Math.trunc(newY)
             } else {
-                if (!isTick()) {
+                if (!isTick())
                     return
-                }
             }
             const movementX = newX - x
             const movementY = newY - y
@@ -164,14 +157,12 @@
         }
     }
     pad.onpointerup = (event) => {
-        if (event.pointerId !== pointerId) {
+        if (event.pointerId !== pointerId)
             return
-        }
         pointerId = null
         if (!scroll.dataset.checked) {
-            if (initX === x && initY === y) {
+            if (initX === x && initY === y)
                 sendMouseButton1Input()
-            }
         }
     }
     let button1Active = false
@@ -250,6 +241,7 @@
         }
     }
     const tickInterval = 20
+
     /**
      * @returns {boolean}
      */
@@ -260,6 +252,7 @@
         }
         return false
     }
+
     /**
      * @param {string} keyboardInput
      */
@@ -280,6 +273,7 @@
             }
         }
     }
+
     /**
      * @param {string} keyboardKey
      */
@@ -319,77 +313,99 @@
             sendKeyboardInput(keyCode)
         }
     }
+
     /**
      * @param {number} scrollX
      * @param {number} scrollY
      */
     function sendScrollInput(scrollX, scrollY) {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         scrollX = Math.max(0, Math.min(255, scrollX + 128))
         scrollY = Math.max(0, Math.min(255, scrollY + 128))
         const bytes = new Uint8Array([input.scroll, scrollX, scrollY])
         webSocket.send(bytes)
     }
+
     /**
      * @param {number} movementX
      * @param {number} movementY
      */
     function sendMouseMoveInput(movementX, movementY) {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         movementX = Math.max(0, Math.min(255, movementX + 128))
         movementY = Math.max(0, Math.min(255, movementY + 128))
         const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
         webSocket.send(bytes)
     }
+
     function sendMouseButton1Input() {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.mouseButton1])
         webSocket.send(bytes)
     }
+
     /**
      * @param {number} keyCode
      */
     function sendKeyboardInput(keyCode) {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.keyboard, keyCode])
         webSocket.send(bytes)
     }
+
     function sendMouseButton1DownInput() {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.mouseButton1Down])
         webSocket.send(bytes)
     }
+
     function sendMouseButton1UpInput() {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.mouseButton1Up])
         webSocket.send(bytes)
     }
+
     function sendMouseButton2DownInput() {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.mouseButton2Down])
         webSocket.send(bytes)
     }
+
     function sendMouseButton2UpInput() {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.mouseButton2Up])
         webSocket.send(bytes)
     }
+
     function sendMouseButton3DownInput() {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.mouseButton3Down])
         webSocket.send(bytes)
     }
+
     function sendMouseButton3UpInput() {
-        if (!isWebSocketOpen()) return
+        if (!isWebSocketOpen())
+            return
         const bytes = new Uint8Array([input.mouseButton3Up])
         webSocket.send(bytes)
     }
+
     /**
      * @returns {boolean}
      */
     function isWebSocketOpen() {
         return webSocket != null && webSocket.readyState === WebSocket.OPEN
     }
+
     /**
      * @returns {Promise<void>}
      */
@@ -400,6 +416,7 @@
             }
         })
     }
+
     /**
      * @returns {Promise<void>}
      */
@@ -414,6 +431,7 @@
             await listenToWebSocketClose()
         }
     }
+
     maintainConnection()
 </script>
 </body>
