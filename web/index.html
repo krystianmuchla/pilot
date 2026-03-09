@@ -32,6 +32,7 @@
 <script>
     /** @type {WebSocket | undefined} */
     let webSocket
+    let reconnection = true
     const pad = document.getElementById('pad')
     const scroll = document.getElementById('scroll')
     const keyboard = document.getElementById('keyboard')
@@ -403,36 +404,30 @@
      * @returns {boolean}
      */
     function isWebSocketOpen() {
-        return webSocket != null && webSocket.readyState === WebSocket.OPEN
+        return webSocket?.readyState === WebSocket.OPEN
     }
 
-    /**
-     * @returns {Promise<void>}
-     */
-    function listenToWebSocketClose() {
-        return new Promise(resolve => {
-            webSocket.onclose = () => {
-                resolve()
-            }
-        })
-    }
-
-    /**
-     * @returns {Promise<void>}
-     */
-    async function maintainConnection() {
-        let connect = true
-        while (connect) {
-            connect = false
-            webSocket = new WebSocket('/')
-            webSocket.onopen = () => {
-                connect = true
-            }
-            await listenToWebSocketClose()
+    function connect() {
+        if (!reconnection || isWebSocketOpen())
+            return
+        reconnection = false
+        webSocket = new WebSocket('/')
+        webSocket.onopen = () => {
+            reconnection = true
+        }
+        webSocket.onclose = () => {
+            setTimeout(connect, 1000)
+        }
+        webSocket.onerror = () => {
+            webSocket.close()
         }
     }
 
-    maintainConnection()
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible')
+            connect()
+    })
+    connect()
 </script>
 </body>
 </html>
