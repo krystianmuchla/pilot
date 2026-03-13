@@ -7,7 +7,7 @@
 </head>
 <body style="background-color: black; margin: 0">
 <div id="pad"
-     style="display: grid; grid-template: 'a . b' auto '. . .' 1fr 'c c c' auto / auto 1fr auto; height: 100%; position: fixed; width: 100%">
+     style="display: grid; grid-template: 'a b c' auto '. . .' 1fr 'd d d' auto / auto 1fr auto; height: 100%; position: fixed; width: 100%">
     <div style="align-content: center; align-items: center; display: grid; grid-area: a; height: 40px; justify-items: center; margin: 10px; position: relative; width: 40px">
         <input id="keyboard" autocapitalize="off" autocorrect="off"
                style="background-color: white; border: 0; box-sizing: border-box; border-radius: 50%; caret-color: transparent; cursor: pointer; height: 100%; outline: 0; position: absolute; width: 100%"/>
@@ -16,14 +16,17 @@
             <path d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm0-80h640v-400H160v400Zm160-40h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM160-280v-400 400Z"/>
         </svg>
     </div>
+    <div id="indicator"
+         style="background-color: red; border-radius: 5px; grid-area: b; height: 5px; justify-self: center; margin: 10px; width: 50px">
+    </div>
     <div id="scroll" data-checked
-         style="align-content: center; background-color: white; border-radius: 50%; cursor: pointer; display: grid; grid-area: b; height: 40px; justify-items: center; margin: 10px; width: 40px">
+         style="align-content: center; background-color: white; border-radius: 50%; cursor: pointer; display: grid; grid-area: c; height: 40px; justify-items: center; margin: 10px; width: 40px">
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"
              style="pointer-events: none">
             <path d="M480-80 310-250l57-57 73 73v-206H235l73 72-58 58L80-480l169-169 57 57-72 72h206v-206l-73 73-57-57 170-170 170 170-57 57-73-73v206h205l-73-72 58-58 170 170-170 170-57-57 73-73H520v205l72-73 58 58L480-80Z"/>
         </svg>
     </div>
-    <div style="display: grid; gap: 10px; grid-area: c; grid-template-columns: minmax(0, 100px) 30px minmax(0, 100px); height: 40px; justify-self: center; margin: 10px">
+    <div style="display: grid; gap: 10px; grid-area: d; grid-template-columns: minmax(0, 100px) 30px minmax(0, 100px); height: 40px; justify-self: center; margin: 10px">
         <div id="button1" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
         <div id="button2" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
         <div id="button3" style="background-color: white; border-radius: 5px; cursor: pointer"></div>
@@ -34,12 +37,13 @@
     let webSocket
     let reconnection = true
     const pad = document.getElementById('pad')
+    const indicator = document.getElementById('indicator')
     const scroll = document.getElementById('scroll')
     const keyboard = document.getElementById('keyboard')
     const button1 = document.getElementById('button1')
     const button2 = document.getElementById('button2')
     const button3 = document.getElementById('button3')
-    for (const elementOnTop of [scroll, keyboard, button1, button2, button3]) {
+    for (const elementOnTop of [scroll, indicator, keyboard, button1, button2, button3]) {
         elementOnTop.ontouchstart = (event) => event.stopPropagation()
         elementOnTop.onpointerdown = (event) => event.stopPropagation()
         elementOnTop.onpointermove = (event) => event.stopPropagation()
@@ -410,12 +414,15 @@
     function connect() {
         if (!reconnection || isWebSocketOpen())
             return
+        indicator.style.backgroundColor = 'orange'
         reconnection = false
         webSocket = new WebSocket('/')
         webSocket.onopen = () => {
+            indicator.style.backgroundColor = 'green'
             reconnection = true
         }
         webSocket.onclose = () => {
+            indicator.style.backgroundColor = 'red'
             setTimeout(connect, 1000)
         }
         webSocket.onerror = () => {
