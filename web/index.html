@@ -35,6 +35,7 @@
 <script>
     /** @type {WebSocket | undefined} */
     let webSocket
+    let connecting = false
     let reconnection = true
     const pad = document.getElementById('pad')
     const indicator = document.getElementById('indicator')
@@ -65,7 +66,7 @@
     pad.addEventListener(
         'touchstart',
         event => {
-            if (isWebSocketOpen())
+            if (isConnected())
                 event.preventDefault()
         },
         {passive: false},
@@ -324,7 +325,7 @@
      * @param {number} scrollY
      */
     function sendScrollInput(scrollX, scrollY) {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         scrollX = Math.max(0, Math.min(255, scrollX + 128))
         scrollY = Math.max(0, Math.min(255, scrollY + 128))
@@ -337,7 +338,7 @@
      * @param {number} movementY
      */
     function sendMouseMoveInput(movementX, movementY) {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         movementX = Math.max(0, Math.min(255, movementX + 128))
         movementY = Math.max(0, Math.min(255, movementY + 128))
@@ -346,7 +347,7 @@
     }
 
     function sendMouseButton1Input() {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.mouseButton1])
         webSocket.send(bytes)
@@ -356,49 +357,49 @@
      * @param {number} keyCode
      */
     function sendKeyboardInput(keyCode) {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.keyboard, keyCode])
         webSocket.send(bytes)
     }
 
     function sendMouseButton1DownInput() {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.mouseButton1Down])
         webSocket.send(bytes)
     }
 
     function sendMouseButton1UpInput() {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.mouseButton1Up])
         webSocket.send(bytes)
     }
 
     function sendMouseButton2DownInput() {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.mouseButton2Down])
         webSocket.send(bytes)
     }
 
     function sendMouseButton2UpInput() {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.mouseButton2Up])
         webSocket.send(bytes)
     }
 
     function sendMouseButton3DownInput() {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.mouseButton3Down])
         webSocket.send(bytes)
     }
 
     function sendMouseButton3UpInput() {
-        if (!isWebSocketOpen())
+        if (!isConnected())
             return
         const bytes = new Uint8Array([input.mouseButton3Up])
         webSocket.send(bytes)
@@ -407,21 +408,28 @@
     /**
      * @returns {boolean}
      */
-    function isWebSocketOpen() {
+    function isConnected() {
         return webSocket?.readyState === WebSocket.OPEN
     }
 
-    function connect() {
-        if (!reconnection || isWebSocketOpen())
+    /**
+     * @param {boolean} forced
+     */
+    function connect(forced = false) {
+        if ((connecting || isConnected()) || (!reconnection && !forced))
             return
-        indicator.style.backgroundColor = 'orange'
+        connecting = true
         reconnection = false
+        indicator.style.backgroundColor = 'orange'
         webSocket = new WebSocket('/')
         webSocket.onopen = () => {
-            indicator.style.backgroundColor = 'green'
+            connecting = false
             reconnection = true
+            indicator.style.backgroundColor = 'green'
         }
         webSocket.onclose = () => {
+            if (connecting)
+                connecting = false
             indicator.style.backgroundColor = 'red'
             setTimeout(connect, 1000)
         }
@@ -432,7 +440,7 @@
 
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible')
-            connect()
+            connect(true)
     })
     connect()
 </script>
