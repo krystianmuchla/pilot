@@ -66,7 +66,7 @@
     pad.addEventListener(
         'touchstart',
         event => {
-            if (isConnected())
+            if (connecting || isConnected())
                 event.preventDefault()
         },
         {passive: false},
@@ -431,7 +431,7 @@
             if (connecting)
                 connecting = false
             indicator.style.backgroundColor = 'red'
-            setTimeout(connect, 1000)
+            connect()
         }
         webSocket.onerror = () => {
             webSocket.close()
