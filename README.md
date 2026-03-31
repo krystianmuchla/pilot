@@ -2,7 +2,7 @@
 
 ### Prerequisites
 
-- [Go](https://go.dev) >= 1.24.3
+- [Go](https://go.dev) >= 1.26.1
 - [uinput module](https://www.kernel.org/doc/html/v4.12/input/uinput.html)
 
 To build the application, run:
