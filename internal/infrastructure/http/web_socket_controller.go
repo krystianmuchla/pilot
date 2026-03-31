@@ -1,9 +1,9 @@
 package http
 
 import (
-	"github.com/gorilla/websocket"
 	"net/http"
-	"pilot/internal/logic"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -20,12 +20,12 @@ const (
 )
 
 type WebSocketController struct {
-	mouseController    *logic.MouseController
-	keyboardController *logic.KeyboardController
+	mouseAdapter    MouseAdapter
+	keyboardAdapter KeyboardAdapter
 }
 
-func NewWebSocketController(mouseController *logic.MouseController, keyboardController *logic.KeyboardController) *WebSocketController {
-	return &WebSocketController{mouseController, keyboardController}
+func NewWebSocketController(mouseAdapter MouseAdapter, keyboardAdapter KeyboardAdapter) *WebSocketController {
+	return &WebSocketController{mouseAdapter: mouseAdapter, keyboardAdapter: keyboardAdapter}
 }
 
 func (controller WebSocketController) Handle(responseWriter http.ResponseWriter, request *http.Request) error {
@@ -43,13 +43,13 @@ func (controller WebSocketController) Handle(responseWriter http.ResponseWriter,
 			if payload[0] == mouseMoveInput {
 				x := int(payload[1]) - 128
 				y := int(payload[2]) - 128
-				err = controller.mouseController.Move(x, y)
+				err = controller.mouseAdapter.Move(x, y)
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == mouseButton1Input {
-				err = controller.mouseController.ClickButton1()
+				err = controller.mouseAdapter.ClickButton1()
 				if err != nil {
 					println(err.Error())
 					break
@@ -57,50 +57,50 @@ func (controller WebSocketController) Handle(responseWriter http.ResponseWriter,
 			} else if payload[0] == scrollInput {
 				x := int(payload[1]) - 128
 				y := int(payload[2]) - 128
-				err = controller.mouseController.Scroll(x, y)
+				err = controller.mouseAdapter.Scroll(x, y)
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == keyboardInput {
 				keyCode := payload[1]
-				err = controller.keyboardController.EnterKey(keyCode)
+				err = controller.keyboardAdapter.EnterKey(keyCode)
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == mouseButton1DownInput {
-				err = controller.mouseController.PressButton1()
+				err = controller.mouseAdapter.PressButton1()
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == mouseButton1UpInput {
-				err = controller.mouseController.ReleaseButton1()
+				err = controller.mouseAdapter.ReleaseButton1()
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == mouseButton2DownInput {
-				err = controller.mouseController.PressButton2()
+				err = controller.mouseAdapter.PressButton2()
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == mouseButton2UpInput {
-				err = controller.mouseController.ReleaseButton2()
+				err = controller.mouseAdapter.ReleaseButton2()
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == mouseButton3DownInput {
-				err = controller.mouseController.PressButton3()
+				err = controller.mouseAdapter.PressButton3()
 				if err != nil {
 					println(err.Error())
 					break
 				}
 			} else if payload[0] == mouseButton3UpInput {
-				err = controller.mouseController.ReleaseButton3()
+				err = controller.mouseAdapter.ReleaseButton3()
 				if err != nil {
 					println(err.Error())
 					break

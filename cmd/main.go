@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"pilot/internal/application"
-	"pilot/internal/logic"
+	"pilot/internal/infrastructure/linux"
 	"syscall"
 	"time"
 )
@@ -17,7 +17,7 @@ func main() {
 	defer stop()
 	fmt.Println("Starting HTTP server...")
 	var httpServer *http.Server
-	mouseController, keyboardController, httpHandler, err := application.ResolveDependencies()
+	mouse, keyboard, httpHandler, err := application.ResolveDependencies()
 	if err != nil {
 		println(err.Error())
 	} else {
@@ -32,16 +32,12 @@ func main() {
 			}
 		}()
 	}
-    fmt.Println("HTTP server started")
+	fmt.Println("HTTP server started")
 	<-ctx.Done()
-	shutdown(httpServer, mouseController, keyboardController)
+	shutdown(httpServer, mouse, keyboard)
 }
 
-func shutdown(
-	httpServer *http.Server,
-	mouseController *logic.MouseController,
-	keyboardController *logic.KeyboardController,
-) {
+func shutdown(httpServer *http.Server, mouse *linux.Mouse, keyboard *linux.Keyboard) {
 	fmt.Println("Shutting down...")
 	if httpServer != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -50,13 +46,13 @@ func shutdown(
 			println(err.Error())
 		}
 	}
-	if mouseController != nil {
-		if err := mouseController.Stop(); err != nil {
+	if mouse != nil {
+		if err := mouse.Close(); err != nil {
 			println(err.Error())
 		}
 	}
-	if keyboardController != nil {
-		if err := keyboardController.Stop(); err != nil {
+	if keyboard != nil {
+		if err := keyboard.Close(); err != nil {
 			println(err.Error())
 		}
 	}

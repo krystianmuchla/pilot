@@ -2,23 +2,25 @@ package application
 
 import (
 	"pilot/internal/infrastructure/http"
-	"pilot/internal/logic"
+	"pilot/internal/infrastructure/linux"
 )
 
-func ResolveDependencies() (*logic.MouseController, *logic.KeyboardController, *http.Handler, error) {
-	mouseController, err := logic.NewMouseController()
+func ResolveDependencies() (*linux.Mouse, *linux.Keyboard, *http.Handler, error) {
+	mouse, err := linux.NewMouse("pilot-mouse")
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	keyboardController, err := logic.NewKeyboardController()
+	keyboard, err := linux.NewKeyboard("pilot-keyboard")
 	if err != nil {
-		return mouseController, nil, nil, err
+		return mouse, nil, nil, err
 	}
-	webSocketController := http.NewWebSocketController(mouseController, keyboardController)
+	mouseAdapter := http.NewMouseAdapter(mouse)
+	keyboardAdapter := http.NewKeyboardAdapter(keyboard)
+	webSocketController := http.NewWebSocketController(mouseAdapter, keyboardAdapter)
 	mainController, err := http.NewMainController()
 	if err != nil {
-		return mouseController, keyboardController, nil, err
+		return mouse, keyboard, nil, err
 	}
 	httpHandler := http.NewHandler(webSocketController, mainController)
-	return mouseController, keyboardController, httpHandler, nil
+	return mouse, keyboard, httpHandler, nil
 }
