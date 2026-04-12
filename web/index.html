@@ -50,7 +50,6 @@
         elementOnTop.onpointermove = (event) => event.stopPropagation()
         elementOnTop.onpointerup = (event) => event.stopPropagation()
     }
-    const touchScreen = 'ontouchstart' in window || navigator.maxTouchPoints
     const input = {
         mouseMove: 0,
         mouseButton1: 1,
@@ -102,8 +101,6 @@
     let x, y
     /** @type {number | undefined | null} */
     let pointerId
-    /** @type {number[][]} */
-    let moveHistory = []
     pad.onpointerdown = (event) => {
         keyboard.blur()
         lastTickTime = 0
@@ -112,19 +109,16 @@
         x = initX
         y = initY
         pointerId = event.pointerId
-        moveHistory = []
     }
     const scrollThreshold = 25
     pad.onpointermove = (event) => {
-        if (event.pointerId !== pointerId)
+        if (event.pointerId !== pointerId || !isTick())
             return
-        let newX = event.clientX
-        let newY = event.clientY
+        const newX = event.clientX
+        const newY = event.clientY
+        const movementX = newX - x
+        const movementY = newY - y
         if (scroll.dataset.checked) {
-            if (!isTick())
-                return
-            const movementX = newX - x
-            const movementY = newY - y
             /** @type {number | undefined} */
             let scrollX, scrollY
             if (Math.abs(movementX) > scrollThreshold)
@@ -137,26 +131,6 @@
                 y = newY
             }
         } else {
-            if (touchScreen) {
-                if (moveHistory.length === 0) {
-                    x = newX
-                    y = newY
-                }
-                moveHistory.push([newX, newY])
-                if (moveHistory.length > 3)
-                    moveHistory.shift()
-                if (!isTick())
-                    return
-                newX = moveHistory.map((p) => p[0]).reduce((a, b) => a + b) / moveHistory.length
-                newY = moveHistory.map((p) => p[1]).reduce((a, b) => a + b) / moveHistory.length
-                newX = Math.trunc(newX)
-                newY = Math.trunc(newY)
-            } else {
-                if (!isTick())
-                    return
-            }
-            const movementX = newX - x
-            const movementY = newY - y
             sendMouseMoveInput(movementX, movementY)
             x = newX
             y = newY
