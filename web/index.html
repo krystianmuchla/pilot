@@ -299,12 +299,9 @@
      * @param {number} scrollY
      */
     function sendScrollInput(scrollX, scrollY) {
-        if (!isConnected())
-            return
         scrollX = Math.max(0, Math.min(255, scrollX + 128))
         scrollY = Math.max(0, Math.min(255, scrollY + 128))
-        const bytes = new Uint8Array([input.scroll, scrollX, scrollY])
-        webSocket.send(bytes)
+        sendInput(input.scroll, scrollX, scrollY)
     }
 
     /**
@@ -312,70 +309,53 @@
      * @param {number} movementY
      */
     function sendMouseMoveInput(movementX, movementY) {
-        if (!isConnected())
-            return
         movementX = Math.max(0, Math.min(255, movementX + 128))
         movementY = Math.max(0, Math.min(255, movementY + 128))
-        const bytes = new Uint8Array([input.mouseMove, movementX, movementY])
-        webSocket.send(bytes)
+        sendInput(input.mouseMove, movementX, movementY)
     }
 
     function sendMouseButton1Input() {
-        if (!isConnected())
-            return
-        const bytes = new Uint8Array([input.mouseButton1])
-        webSocket.send(bytes)
+        sendInput(input.mouseButton1)
     }
 
     /**
      * @param {number} keyCode
      */
     function sendKeyboardInput(keyCode) {
-        if (!isConnected())
-            return
-        const bytes = new Uint8Array([input.keyboard, keyCode])
-        webSocket.send(bytes)
+        sendInput(input.keyboard, keyCode)
     }
 
     function sendMouseButton1DownInput() {
-        if (!isConnected())
-            return
-        const bytes = new Uint8Array([input.mouseButton1Down])
-        webSocket.send(bytes)
+        sendInput(input.mouseButton1Down)
     }
 
     function sendMouseButton1UpInput() {
-        if (!isConnected())
-            return
-        const bytes = new Uint8Array([input.mouseButton1Up])
-        webSocket.send(bytes)
+        sendInput(input.mouseButton1Up)
     }
 
     function sendMouseButton2DownInput() {
-        if (!isConnected())
-            return
-        const bytes = new Uint8Array([input.mouseButton2Down])
-        webSocket.send(bytes)
+        sendInput(input.mouseButton2Down)
     }
 
     function sendMouseButton2UpInput() {
-        if (!isConnected())
-            return
-        const bytes = new Uint8Array([input.mouseButton2Up])
-        webSocket.send(bytes)
+        sendInput(input.mouseButton2Up)
     }
 
     function sendMouseButton3DownInput() {
-        if (!isConnected())
-            return
-        const bytes = new Uint8Array([input.mouseButton3Down])
-        webSocket.send(bytes)
+        sendInput(input.mouseButton3Down)
     }
 
     function sendMouseButton3UpInput() {
+        sendInput(input.mouseButton3Up)
+    }
+
+    /**
+     * @param {number} input
+     */
+    function sendInput(...input) {
         if (!isConnected())
             return
-        const bytes = new Uint8Array([input.mouseButton3Up])
+        const bytes = new Uint8Array(input)
         webSocket.send(bytes)
     }
 
