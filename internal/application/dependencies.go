@@ -21,6 +21,7 @@ func ResolveDependencies() (*linux.Mouse, *linux.Keyboard, *http.Handler, error)
 	if err != nil {
 		return mouse, keyboard, nil, err
 	}
-	httpHandler := http.NewHandler(webSocketController, mainController)
+	resourceController := http.NewResourceController()
+	httpHandler := http.NewHandler(webSocketController, mainController, resourceController)
 	return mouse, keyboard, httpHandler, nil
 }

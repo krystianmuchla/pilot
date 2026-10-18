@@ -1,0 +1,19 @@
+{
+  "name": "Pilot",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/resources/maskable_icon_192px.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/resources/maskable_icon_512px.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

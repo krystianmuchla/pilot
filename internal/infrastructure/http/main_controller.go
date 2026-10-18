@@ -3,6 +3,7 @@ package http
 import (
 	"html/template"
 	"net/http"
+	"pilot/web"
 )
 
 type MainController struct {
@@ -10,7 +11,7 @@ type MainController struct {
 }
 
 func NewMainController() (*MainController, error) {
-	temp, err := template.ParseFiles("web/index.html")
+	temp, err := template.New("").Parse(web.IndexHtml)
 	if err != nil {
 		return nil, err
 	}
